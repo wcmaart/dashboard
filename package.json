@@ -1,0 +1,23 @@
+{
+  "name": "dashboard",
+  "version": "0.0.1",
+  "description": "Dashboard to coordinate the other parts of the wcma api",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wcmaart/dashboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wcmaart/dashboard/issues"
+  },
+  "homepage": "https://github.com/wcmaart/dashboard#readme",
+  "author": "",
+  "license": "CC0-1.0",
+  "private": false,
+  "dependencies": {
+    "colors": "^1.1.2",
+    "dotenv": "^5.0.1",
+    "prompt-sync": "^4.1.6",
+    "standard": "^11.0.1"
+  }
+}
