@@ -17,6 +17,8 @@ const watchJS = () => {
       '--out-file',
       path.join(rootDir, '/app', filepath)
     ])
+    global.doRestart = true
+    process.exit()
   })
   watcherJS.on('add', function (filepath, root, stat) {
     console.log('New file: ', filepath)
@@ -31,6 +33,8 @@ const watchJS = () => {
       '--out-file',
       path.join(rootDir, '/app', filepath)
     ])
+    global.doRestart = true
+    process.exit()
   })
 }
 
@@ -101,5 +105,22 @@ const watcher = () => {
   watchJS()
   watchCSS()
   watchStatic()
+
+  //  When we call an exit I want the thing to start again
+  process.on('exit', function () {
+    const nodeBin = process.argv.shift()
+    const appPath = process.argv
+    if (appPath.length === 1) {
+      appPath.push('--skipBuild')
+    }
+    if (global.doRestart === true) {
+      console.log('>>>>>>>>>>>>>>>>> RESTARTING >>>>>>>>>>>>>>>>'.inverse)
+      require('child_process').spawn(nodeBin, appPath, {
+        cwd: process.cwd(),
+        detached: true,
+        stdio: 'inherit'
+      })
+    }
+  })
 }
 exports.watcher = watcher

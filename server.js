@@ -39,6 +39,45 @@ console.log(`server.js is being run from this directory: ${process.cwd()}`.help)
 console.log(`server.js exists in this directory: ${rootDir}`.help)
 
 /*
+ * Check to see if we have been passed in command line parameters to define
+ * the port, host, environment and if we want to skip any build steps
+ */
+const argOptionDefinitions = [
+  { name: 'port', alias: 'p', type: Number },
+  { name: 'host', alias: 'h', type: String },
+  { name: 'env', alias: 'e', type: String },
+  { name: 'skipBuild', alias: 's', type: Boolean, defaultOption: false }
+]
+const commandLineArgs = require('command-line-args')
+const argOptions = commandLineArgs(argOptionDefinitions)
+
+if ('port' in argOptions || 'host' in argOptions || 'env' in argOptions) {
+  let port = 4000
+  let host = 'localhost'
+  let nodeEnv = 'development'
+  if ('port' in argOptions) port = argOptions.port
+  if ('host' in argOptions) host = argOptions.host
+  if ('env' in argOptions) nodeEnv = argOptions.env
+  const env = `# SERVER DATA
+PORT=${port}
+HOST=${host}
+NODE_ENV=${nodeEnv}
+`
+  fs.writeFileSync(path.join(rootDir, '.env'), env, 'utf-8')
+}
+
+//  Here we are managing if we are going to skip the build step
+//  we'll want to do that if we are forcing a restart of the app.
+//  We force a restart if we detect files changing, but only on
+//  dev. We will need to set a flag to tell the difference between
+//  a forced exit we want and a crash
+let skipBuild = false
+global.doRestart = false
+if ('skipBuild' in argOptions && argOptions.skipBuild === true) {
+  skipBuild = true
+}
+
+/*
  * Check to see if the `.env` file exists, if not we need ask the user questions
  * to create it
  */
@@ -92,18 +131,21 @@ require('dotenv').config()
  *
  */
 
-// Copy template files
-spawnSync('npx', [
-  'babel',
-  'src/templates',
-  '--out-dir',
-  'app/templates',
-  '--copy-files'
-])
+if (skipBuild === false) {
+  // Copy template files
+  spawnSync('npx', [
+    'babel',
+    'src/templates',
+    '--out-dir',
+    'app/templates',
+    '--copy-files'
+  ])
 
-//  Compile node files
-const compileFiles = spawnSync('npx', ['babel', 'src', '--out-dir', 'app'])
-console.log('compileFiles: ', compileFiles.stdout.toString())
+  //  Compile node files
+  const result = spawnSync('npx', ['babel', 'src', '--out-dir', 'app'])
+  console.log('built!')
+  console.log(result)
+}
 
 // ########################################################################
 /*
@@ -113,32 +155,37 @@ console.log('compileFiles: ', compileFiles.stdout.toString())
  *
  */
 
-if (!fs.existsSync(path.join(rootDir, '/app/public'))) {
-  fs.mkdirSync(path.join(rootDir, '/app/public'))
-}
-if (!fs.existsSync(path.join(rootDir, '/app/public/css'))) {
-  fs.mkdirSync(path.join(rootDir, '/app/public/css'))
-}
-const sass = require('node-sass')
-let sassResult = ''
-if (process.env.NODE_ENV === 'development') {
-  sassResult = sass.renderSync({
-    file: path.join(rootDir, '/src/sass/main.scss'),
-    outputStyle: 'compact',
-    outFile: path.join(rootDir, '/app/public/css/main.css'),
-    sourceMap: true
-  })
+if (skipBuild === false) {
+  if (!fs.existsSync(path.join(rootDir, '/app/public'))) {
+    fs.mkdirSync(path.join(rootDir, '/app/public'))
+  }
+  if (!fs.existsSync(path.join(rootDir, '/app/public/css'))) {
+    fs.mkdirSync(path.join(rootDir, '/app/public/css'))
+  }
+  const sass = require('node-sass')
+  let sassResult = ''
+  if (process.env.NODE_ENV === 'development') {
+    sassResult = sass.renderSync({
+      file: path.join(rootDir, '/src/sass/main.scss'),
+      outputStyle: 'compact',
+      outFile: path.join(rootDir, '/app/public/css/main.css'),
+      sourceMap: true
+    })
+    fs.writeFileSync(
+      path.join(rootDir, '/app/public/css/main.css.map'),
+      sassResult.map
+    )
+  } else {
+    sassResult = sass.renderSync({
+      file: path.join(rootDir, '/src/sass/main.scss'),
+      outputStyle: 'compressed'
+    })
+  }
   fs.writeFileSync(
-    path.join(rootDir, '/app/public/css/main.css.map'),
-    sassResult.map
+    path.join(rootDir, '/app/public/css/main.css'),
+    sassResult.css
   )
-} else {
-  sassResult = sass.renderSync({
-    file: path.join(rootDir, '/src/sass/main.scss'),
-    outputStyle: 'compressed'
-  })
 }
-fs.writeFileSync(path.join(rootDir, '/app/public/css/main.css'), sassResult.css)
 
 // ########################################################################
 /*
@@ -160,7 +207,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // ########################################################################
 /*
- * STEP THREE
+ * STEP FIVE
  *
  * Now we have enough for our server to actually run on a port we need
  * to check to see if a config.json file exist, which is going to actually
