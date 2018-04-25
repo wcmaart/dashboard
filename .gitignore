@@ -5,3 +5,5 @@ sessions
 
 .env
 package.json
+
+.pid

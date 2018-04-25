@@ -142,9 +142,7 @@ if (skipBuild === false) {
   ])
 
   //  Compile node files
-  const result = spawnSync('npx', ['babel', 'src', '--out-dir', 'app'])
-  console.log('built!')
-  console.log(result)
+  spawnSync('npx', ['babel', 'src', '--out-dir', 'app'])
 }
 
 // ########################################################################
@@ -265,6 +263,25 @@ app.use(
 )
 
 app.use('/', routes)
+
+//  Check to see if the old pid is active, if so we kill it
+const pidFile = path.join(rootDir, '.pid')
+if (fs.existsSync(pidFile)) {
+  const pid = fs.readFileSync(pidFile, 'utf-8')
+  console.log('old pid: ', pid)
+  const isRunning = require('is-running')(pid)
+  if (isRunning) {
+    process.kill(pid)
+  }
+}
+
+fs.writeFileSync(pidFile, process.pid, 'utf-8')
+
+// node child_process spawn
+if (process.env.NODE_ENV === 'development' && skipBuild === false) {
+  const opn = require('opn')
+  opn(`http://${process.env.HOST}:${process.env.PORT}`)
+}
 
 console.log(`>> Connect to: ${process.env.HOST}:${process.env.PORT}`.alert)
 http.createServer(app).listen(process.env.PORT)
