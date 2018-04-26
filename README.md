@@ -32,8 +32,10 @@ This will write out a new `.env` file each time, you shouldn't add anything else
 
 **Note:** there is no `config.json` file yet! :)
 
-AS you deploy new code, you just need to get the new code then restart the app running `yarn start` and it will automatically rebuild all the files you need.
+As you deploy new code, you just need to get the new code then restart the app running `yarn start` and it will automatically rebuild all the files you need.
 
 _In theory_
+
+Better still, install `pm2` and just tell it to restart the app whenever changes are pushed/pulled to the server.
 
 I am now about to test all this!
