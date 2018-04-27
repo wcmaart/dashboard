@@ -6,3 +6,5 @@ sessions
 .env
 
 .pid
+
+config.json

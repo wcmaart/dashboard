@@ -1,5 +1,4 @@
-exports.index = (request, response) => {
-  const templateValues = {}
-  templateValues.msg = 'This worked'
-  return response.render('main/index', templateValues)
+exports.index = (req, res) => {
+  req.templateValues.msg = 'hello world'
+  return res.render('main/index', req.templateValues)
 }
