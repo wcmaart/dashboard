@@ -119,6 +119,24 @@ NODE_ENV=${nodeEnv}
 //  Now we can actually require it
 require('dotenv').config()
 
+//  We will also check for a config file, if there isn't one, we'll create
+//  it
+const configFile = path.join(rootDir, 'config.json')
+if (!fs.existsSync(configFile)) {
+  const crypto = require('crypto')
+  const handshake = crypto
+    .createHash('md5')
+    .update(`${Math.random()}`)
+    .digest('hex')
+
+  const config = {
+    handshake: handshake
+  }
+
+  const configJSONPretty = JSON.stringify(config, null, 4)
+  fs.writeFileSync(configFile, configJSONPretty, 'utf-8')
+}
+
 // ########################################################################
 /*
  * STEP TWO
@@ -277,11 +295,47 @@ if (fs.existsSync(pidFile)) {
 
 fs.writeFileSync(pidFile, process.pid, 'utf-8')
 
-// node child_process spawn
+//  Read in the config file
+const configRaw = fs.readFileSync(configFile, 'utf-8')
+global.config = JSON.parse(configRaw)
+
+//  If we are on the dev server and we aren't restarting with a
+//  build skip, then start up a browser to get the user going.
+//  If we don't have any Auth0 stuff in place yet we also need
+//  to pass over the handshake value so we can do a quick
+//  basic authentication.
 if (process.env.NODE_ENV === 'development' && skipBuild === false) {
   const opn = require('opn')
-  opn(`http://${process.env.HOST}:${process.env.PORT}`)
+  // If there is no auth0 entry in the config file then we need
+  // to pass over the handshake value
+  if (!('auth0' in global.config)) {
+    opn(
+      `http://${process.env.HOST}:${process.env.PORT}?handshake=${global.config.handshake}`
+    )
+  } else {
+    opn(`http://${process.env.HOST}:${process.env.PORT}`)
+  }
+  console.log(`>> Connect to: ${process.env.HOST}:${process.env.PORT}`.alert)
+} else {
+  console.log(
+    `
+>> Welcome to the Dashboard, please visit the site however you have your host and ports setup to see it from the outside world`
+      .info
+  )
+  if (!('auth0' in global.config)) {
+    console.log(
+      `>> You will be asked for a 'handshake' code while setting up the next step, please use the following value
+      `.info
+    )
+    console.log(global.config.handshake.bold.warn)
+    console.log('')
+    console.log(
+      '>> You can also find the value in the '.info +
+        'config.json'.bold.data +
+        ' file'.info
+    )
+    console.log('')
+  }
 }
 
-console.log(`>> Connect to: ${process.env.HOST}:${process.env.PORT}`.alert)
 http.createServer(app).listen(process.env.PORT)
