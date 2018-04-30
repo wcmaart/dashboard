@@ -247,10 +247,19 @@ const cookieParser = require('cookie-parser')
 const session = require('express-session')
 const FileStore = require('session-file-store')(session)
 const http = require('http')
+const helpers = require('./app/helpers')
+const passport = require('passport')
+const Auth0Strategy = require('passport-auth0')
+
+//  Read in the config file
+const configRaw = fs.readFileSync(configFile, 'utf-8')
+global.config = JSON.parse(configRaw)
 
 const app = express()
 const hbs = exphbs.create({
-  extname: '.html'
+  extname: '.html',
+  helpers,
+  partialsDir: `${__dirname}/app/templates/includes/`
 })
 
 app.engine('html', hbs.engine)
@@ -271,7 +280,7 @@ app.use(cookieParser())
 app.use(
   session({
     // Here we are creating a unique session identifier
-    secret: 'session_token',
+    secret: global.config.handshake,
     resave: true,
     saveUninitialized: true,
     store: new FileStore({
@@ -280,7 +289,48 @@ app.use(
   })
 )
 
+if ('auth0' in global.config) {
+  // Configure Passport to use Auth0
+  const strategy = new Auth0Strategy(
+    {
+      domain: global.config.auth0.AUTH0_DOMAIN,
+      clientID: global.config.auth0.AUTH0_CLIENT_ID,
+      clientSecret: global.config.auth0.AUTH0_SECRET,
+      callbackURL: global.config.auth0.AUTH0_CALLBACK_URL
+    },
+    (accessToken, refreshToken, extraParams, profile, done) => {
+      return done(null, profile)
+    }
+  )
+
+  passport.use(strategy)
+
+  // This can be used to keep a smaller payload
+  passport.serializeUser(function (user, done) {
+    done(null, user)
+  })
+
+  passport.deserializeUser(function (user, done) {
+    done(null, user)
+  })
+
+  app.use(passport.initialize())
+  app.use(passport.session())
+}
+
 app.use('/', routes)
+
+app.use((request, response) => {
+  console.error('ERROR!!')
+  response.status(404).render('static/404')
+})
+
+if (process.env.NODE_ENV !== 'DEV') {
+  app.use((err, req, res) => {
+    console.error(err.stack)
+    res.status(500).send('Something broke!')
+  })
+}
 
 //  Check to see if the old pid is active, if so we kill it
 const pidFile = path.join(rootDir, '.pid')
@@ -294,10 +344,6 @@ if (fs.existsSync(pidFile)) {
 }
 
 fs.writeFileSync(pidFile, process.pid, 'utf-8')
-
-//  Read in the config file
-const configRaw = fs.readFileSync(configFile, 'utf-8')
-global.config = JSON.parse(configRaw)
 
 //  If we are on the dev server and we aren't restarting with a
 //  build skip, then start up a browser to get the user going.
