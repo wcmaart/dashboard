@@ -54,7 +54,7 @@ router.use(function (req, res, next) {
 
     //  Set up a nice handy default callback if we are developing
     if (process.env.NODE_ENV === 'development') {
-      req.templateValues.callbackUrl = `${process.env.HOST}:${process.env.PORT}/callback`
+      req.templateValues.callbackUrl = `http://${process.env.HOST}:${process.env.PORT}/callback`
     }
     req.templateValues.NODE_ENV = process.env.NODE_ENV
     return res.render('config/auth0', req.templateValues)
