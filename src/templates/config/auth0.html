@@ -8,7 +8,7 @@
 
 <body>
   <div class="wrapper">
-    <div class="content admin">
+    <div class="container admin-layout">
       <h1>Auth0</h1>
       <p>
         To use this dashboard you should first set up and be familiar with
@@ -52,27 +52,34 @@
                 <input type="text" name="handshake" value="{{handshake}}" placeholder="Your handshake token" />
               </td>
             </tr>
+            <tr>
+              <td>&nbsp;</td>
+              <td>
+                <button type="submit" name="action" value="save">Save</button>
+              </td>
+            </tr>
           </table>
-          <button type="submit" name="action" value="save">Save</button>
+
         </form>
       </p>
+      <hr />
       <h2>Helpful information!</h2>
       <p>
         1. When you've created an Auth0 account, you will need to create a new application by pressing the NEW APPLICATION button.
-        <img src="/images/auth0_1.png">
+        <img class="medium border" src="/images/auth0_1.png">
       </p>
       <p>
         2. Give the app a name and create it as a "Regular Web Application".
-        <img src="/images/auth0_2.png">
+        <img class="medium border" src="/images/auth0_2.png">
       </p>
       <p>
         3. You will then copy the domain, Client ID and Client Secret from the form.
-        <img src="/images/auth0_3.png">
+        <img class="medium border" src="/images/auth0_3.png">
       </p>
       <p>
         4. And you will need to set up the Callback, Origins and Logout URLs roughly as follow. You will need to substitute in your
         own domains, ports and callback.
-        <img src="/images/auth0_4.png">
+        <img class="medium border" src="/images/auth0_4.png">
       </p>
       <p>
         <strong>NOTE:</strong> for development purposes it is useful to map the domain
