@@ -3,11 +3,17 @@ const passport = require('passport')
 const router = express.Router()
 const fs = require('fs')
 const path = require('path')
+const User = require('../modules/user')
+
 // const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn()
 
 // Break out all the seperate parts of the site
 /* eslint-disable import/no-unresolved */
+const admin = require('./admin')
 const main = require('./main')
+const config = require('./config')
+const developer = require('./developer')
+const user = require('./user')
 
 // ############################################################################
 //
@@ -23,6 +29,9 @@ router.use(function (req, res, next) {
   req.config = global.config
   if (req.user === undefined) {
     req.user = null
+  }
+  if (req.user !== null) {
+    req.user = new User(req.user)
   }
   //  Todo, make an actual user object
   req.templateValues.user = req.user
@@ -83,6 +92,11 @@ router.use(function (req, res, next) {
 // ############################################################################
 
 router.get('/', main.index)
+router.get('/admin', admin.index)
+router.get('/admin/users', admin.users)
+router.get('/config', config.index)
+router.get('/developer', developer.index)
+router.get('/settings', user.settings)
 router.get('/wait', main.wait)
 
 // ############################################################################
@@ -93,6 +107,7 @@ router.get('/wait', main.wait)
 
 const rootDir = __dirname
 const configFile = path.join(rootDir, '../../config.json')
+
 if (fs.existsSync(configFile)) {
   const configRaw = fs.readFileSync(configFile, 'utf-8')
   global.config = JSON.parse(configRaw)

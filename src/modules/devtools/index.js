@@ -80,7 +80,7 @@ const watchCSS = () => {
 }
 
 const watchStatic = () => {
-  //  Watch for JS changes
+  //  Watch for file changes
   const watcherStatic = sane(path.join(rootDir, '/src'), {
     glob: ['**/*.html', '**/*.png', '**/*.jpg', '**/*.jpeg']
   })
