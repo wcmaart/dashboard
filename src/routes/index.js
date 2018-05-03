@@ -4,8 +4,7 @@ const router = express.Router()
 const fs = require('fs')
 const path = require('path')
 const User = require('../modules/user')
-
-// const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn()
+const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn()
 
 // Break out all the seperate parts of the site
 /* eslint-disable import/no-unresolved */
@@ -92,11 +91,11 @@ router.use(function (req, res, next) {
 // ############################################################################
 
 router.get('/', main.index)
-router.get('/admin', admin.index)
-router.get('/admin/users', admin.users)
-router.get('/config', config.index)
-router.get('/developer', developer.index)
-router.get('/settings', user.settings)
+router.get('/admin', ensureLoggedIn, admin.index)
+router.get('/admin/users', ensureLoggedIn, admin.users)
+router.get('/config', ensureLoggedIn, config.index)
+router.get('/developer', ensureLoggedIn, developer.index)
+router.get('/settings', ensureLoggedIn, user.settings)
 router.get('/wait', main.wait)
 
 // ############################################################################
