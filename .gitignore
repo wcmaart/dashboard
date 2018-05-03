@@ -4,7 +4,7 @@ app
 sessions
 
 .env
-
 .pid
+.vscode
 
 config.json

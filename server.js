@@ -52,7 +52,7 @@ const commandLineArgs = require('command-line-args')
 const argOptions = commandLineArgs(argOptionDefinitions)
 
 if ('port' in argOptions || 'host' in argOptions || 'env' in argOptions) {
-  let port = 4000
+  let port = 4002
   let host = 'localhost'
   let nodeEnv = 'development'
   if ('port' in argOptions) port = argOptions.port
@@ -88,13 +88,13 @@ if (!fs.existsSync(path.join(rootDir, '.env'))) {
   )
 
   process.stdout.write(`question `.data)
-  let port = prompt('port number (4000): ')
+  let port = prompt('port number (4002): ')
 
-  if (port === '') port = 4000
+  if (port === '') port = 4002
   port = parseInt(port)
   if (isNaN(port) || port < 0 || port > 49151) {
-    console.log('Port must be between 0-49151, setting port to 4000'.alert)
-    port = 4000
+    console.log('Port must be between 0-49151, setting port to 4002'.alert)
+    port = 4002
   }
 
   process.stdout.write(`question `.data)
@@ -156,6 +156,18 @@ if (skipBuild === false) {
     'src/templates',
     '--out-dir',
     'app/templates',
+    '--copy-files'
+  ])
+
+  //  Compile node files
+  spawnSync('npx', ['babel', 'src', '--out-dir', 'app'])
+
+  // Copy template files
+  spawnSync('npx', [
+    'babel',
+    'src/public/images',
+    '--out-dir',
+    'app/public/images',
     '--copy-files'
   ])
 
@@ -247,10 +259,19 @@ const cookieParser = require('cookie-parser')
 const session = require('express-session')
 const FileStore = require('session-file-store')(session)
 const http = require('http')
+const helpers = require('./app/helpers')
+const passport = require('passport')
+const Auth0Strategy = require('passport-auth0')
+
+//  Read in the config file
+const configRaw = fs.readFileSync(configFile, 'utf-8')
+global.config = JSON.parse(configRaw)
 
 const app = express()
 const hbs = exphbs.create({
-  extname: '.html'
+  extname: '.html',
+  helpers,
+  partialsDir: `${__dirname}/app/templates/includes/`
 })
 
 app.engine('html', hbs.engine)
@@ -271,7 +292,7 @@ app.use(cookieParser())
 app.use(
   session({
     // Here we are creating a unique session identifier
-    secret: 'session_token',
+    secret: global.config.handshake,
     resave: true,
     saveUninitialized: true,
     store: new FileStore({
@@ -280,7 +301,48 @@ app.use(
   })
 )
 
+if ('auth0' in global.config) {
+  // Configure Passport to use Auth0
+  const strategy = new Auth0Strategy(
+    {
+      domain: global.config.auth0.AUTH0_DOMAIN,
+      clientID: global.config.auth0.AUTH0_CLIENT_ID,
+      clientSecret: global.config.auth0.AUTH0_SECRET,
+      callbackURL: global.config.auth0.AUTH0_CALLBACK_URL
+    },
+    (accessToken, refreshToken, extraParams, profile, done) => {
+      return done(null, profile)
+    }
+  )
+
+  passport.use(strategy)
+
+  // This can be used to keep a smaller payload
+  passport.serializeUser(function (user, done) {
+    done(null, user)
+  })
+
+  passport.deserializeUser(function (user, done) {
+    done(null, user)
+  })
+
+  app.use(passport.initialize())
+  app.use(passport.session())
+}
+
 app.use('/', routes)
+
+app.use((request, response) => {
+  console.error('ERROR!!')
+  response.status(404).render('static/404')
+})
+
+if (process.env.NODE_ENV !== 'DEV') {
+  app.use((err, req, res) => {
+    console.error(err.stack)
+    res.status(500).send('Something broke!')
+  })
+}
 
 //  Check to see if the old pid is active, if so we kill it
 const pidFile = path.join(rootDir, '.pid')
@@ -295,25 +357,23 @@ if (fs.existsSync(pidFile)) {
 
 fs.writeFileSync(pidFile, process.pid, 'utf-8')
 
-//  Read in the config file
-const configRaw = fs.readFileSync(configFile, 'utf-8')
-global.config = JSON.parse(configRaw)
-
 //  If we are on the dev server and we aren't restarting with a
 //  build skip, then start up a browser to get the user going.
 //  If we don't have any Auth0 stuff in place yet we also need
 //  to pass over the handshake value so we can do a quick
 //  basic authentication.
-if (process.env.NODE_ENV === 'development' && skipBuild === false) {
-  const opn = require('opn')
-  // If there is no auth0 entry in the config file then we need
-  // to pass over the handshake value
-  if (!('auth0' in global.config)) {
-    opn(
-      `http://${process.env.HOST}:${process.env.PORT}?handshake=${global.config.handshake}`
-    )
-  } else {
-    opn(`http://${process.env.HOST}:${process.env.PORT}`)
+if (process.env.NODE_ENV === 'development') {
+  if (skipBuild === false) {
+    const opn = require('opn')
+    // If there is no auth0 entry in the config file then we need
+    // to pass over the handshake value
+    if (!('auth0' in global.config)) {
+      opn(
+        `http://${process.env.HOST}:${process.env.PORT}?handshake=${global.config.handshake}`
+      )
+    } else {
+      opn(`http://${process.env.HOST}:${process.env.PORT}`)
+    }
   }
   console.log(`>> Connect to: ${process.env.HOST}:${process.env.PORT}`.alert)
 } else {

@@ -24,7 +24,7 @@ You should now be able to develop more or less happily.
 
 If you are on the machine you are installing to, which you probably will be as you'll want to set up `pm2` or `forever` or something, you can run `yarn start` and it will ask you the host, port and environment questions. You can also start the app with...
 
-`yarn start --port 4000 --host localhost --env production`
+`yarn start --port 4002 --host localhost --env production`
 
 Or whichever port you want to run it on.
 
