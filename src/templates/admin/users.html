@@ -16,8 +16,11 @@
       <h1>Admin / Users</h1>
       <p>
         <ul>
+          {{#each users}}
           <li>
+            <a href="/admin/user/{{user_id}}">{{nickname}}</a>
           </li>
+          {{/each}}
         </ul>
       </p>
     </div>

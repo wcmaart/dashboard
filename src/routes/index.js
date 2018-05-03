@@ -28,11 +28,19 @@ router.use(function (req, res, next) {
   req.config = global.config
   if (req.user === undefined) {
     req.user = null
+  } else {
+    //  Shortcut the roles
+    if ('user_metadata' in req.user && 'roles' in req.user.user_metadata) {
+      req.user.roles = req.user.user_metadata.roles
+      req.user.apitoken = req.user.user_metadata.apitoken
+    } else {
+      req.user.roles = {
+        isAdmin: false,
+        isDeveloper: false,
+        isStaff: false
+      }
+    }
   }
-  if (req.user !== null) {
-    req.user = new User(req.user)
-  }
-  //  Todo, make an actual user object
   req.templateValues.user = req.user
 
   //  If there is no Auth0 setting in config then we _must_
@@ -93,6 +101,8 @@ router.use(function (req, res, next) {
 router.get('/', main.index)
 router.get('/admin', ensureLoggedIn, admin.index)
 router.get('/admin/users', ensureLoggedIn, admin.users)
+router.get('/admin/user/:id', ensureLoggedIn, admin.user)
+router.post('/admin/user/:id', ensureLoggedIn, admin.user)
 router.get('/config', ensureLoggedIn, config.index)
 router.get('/developer', ensureLoggedIn, developer.index)
 router.get('/settings', ensureLoggedIn, user.settings)
@@ -138,7 +148,9 @@ if (fs.existsSync(configFile)) {
       passport.authenticate('auth0', {
         failureRedirect: '/'
       }),
-      function (req, res) {
+      async function (req, res) {
+        //  Update the user with extra information
+        req.session.passport.user = await new User().get(req.user)
         res.redirect(req.session.returnTo || '/')
       }
     )

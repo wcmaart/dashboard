@@ -1,3 +1,5 @@
+const moment = require('moment')
+
 exports.ifIndexDivisibleBy = (index, divisor, options) => {
   if ((index + 1) % divisor === 0 && index > 0) {
     return options.fn(this)
@@ -90,4 +92,9 @@ exports.and = (v1, v2) => {
 
 exports.or = (v1, v2) => {
   return v1 || v2
+}
+
+exports.timePretty = t => {
+  if (t === null || t === undefined) return ''
+  return moment(t).format('dddd, MMMM Do YYYY, h:mm:ss a')
 }

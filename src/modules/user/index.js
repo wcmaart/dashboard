@@ -1,150 +1,167 @@
 const fs = require('fs')
+const path = require('path')
 const crypto = require('crypto')
+const request = require('request-promise')
+
+const rootDir = path.join(__dirname, '../../..')
+
+/*
+ *  This goes and gets us the token we need to make further API calls
+ *  TODO: We will store this token so we don't need to keep refreshing
+ *  it, we'll stick it in `global` along with the expire time, and only
+ *  re-fetch if we don't have a token, or it's expired.
+ */
+const getAuth0Token = async () => {
+  var options = {
+    method: 'POST',
+    url: `https://${global.config.auth0.AUTH0_DOMAIN}/oauth/token`,
+    headers: { 'content-type': 'application/json' },
+    body: {
+      grant_type: 'client_credentials',
+      client_id: global.config.auth0.AUTH0_CLIENT_ID,
+      client_secret: global.config.auth0.AUTH0_SECRET,
+      audience: `https://${global.config.auth0.AUTH0_DOMAIN}/api/v2/`
+    },
+    json: true
+  }
+
+  const auth0Token = await request(options)
+    .then(response => {
+      return response.access_token
+    })
+    .catch(error => {
+      return [error]
+    })
+  return auth0Token
+}
+
+/*
+ * This will go and get the user from Auth0, this is the object
+ * that we want to use everywhere else in the system
+ */
+const getUserSync = async id => {
+  const auth0Token = await getAuth0Token()
+  const payload = {}
+  const user = await request({
+    url: `https://${global.config.auth0.AUTH0_DOMAIN}/api/v2/users/${id}`,
+    method: 'GET',
+    headers: {
+      'content-type': 'application/json',
+      Authorization: `bearer ${auth0Token}`
+    },
+    json: payload
+  })
+    .then(response => {
+      return response
+    })
+    .catch(error => {
+      return [error]
+    })
+  return user
+}
+
+/*
+ * This will set a developer API token on the user
+ */
+const setApiToken = async id => {
+  const auth0Token = await getAuth0Token()
+  const newToken = crypto
+    .createHash('md5')
+    .update(`${Math.random()}`)
+    .digest('hex')
+  const payload = { user_metadata: { apitoken: newToken } }
+  const user = await request({
+    url: `https://${global.config.auth0.AUTH0_DOMAIN}/api/v2/users/${id}`,
+    method: 'PATCH',
+    headers: {
+      'content-type': 'application/json',
+      Authorization: `bearer ${auth0Token}`
+    },
+    json: payload
+  })
+    .then(response => {
+      return response
+    })
+    .catch(error => {
+      return [error]
+    })
+  return user
+}
+
+const setRoles = async (id, roles) => {
+  const auth0Token = await getAuth0Token()
+  const payload = { user_metadata: { roles: roles } }
+  const user = await request({
+    url: `https://${global.config.auth0.AUTH0_DOMAIN}/api/v2/users/${id}`,
+    method: 'PATCH',
+    headers: {
+      'content-type': 'application/json',
+      Authorization: `bearer ${auth0Token}`
+    },
+    json: payload
+  })
+    .then(response => {
+      return response
+    })
+    .catch(error => {
+      return [error]
+    })
+  return user
+}
+
+const getUser = async id => {
+  let user = await getUserSync(id)
+  //  Check to see if we have set the admin user yet
+  //  if not then we need to do that now
+  if (!('adminSet' in global.config) || global.config.adminSet === false) {
+    const roles = {
+      isAdmin: true,
+      isStaff: true,
+      isDeveloper: true
+    }
+    user = await setRoles(id, roles)
+    global.config.adminSet = true
+    const configFile = path.join(rootDir, 'config.json')
+    const configJSONPretty = JSON.stringify(global.config, null, 4)
+    fs.writeFileSync(configFile, configJSONPretty, 'utf-8')
+  }
+
+  //  Check to see if any roles have been set on the user, if not then
+  //  apply the default roles
+  if (!('user_metadata' in user) || !('roles' in user.user_metadata)) {
+    const roles = {
+      isAdmin: false,
+      isStaff: false,
+      isDeveloper: true
+    }
+    user = await setRoles(id, roles)
+  }
+
+  //  Make sure we have a developer API token
+  if (!('user_metadata' in user) || !('apitoken' in user.user_metadata)) {
+    user = await setApiToken(id)
+  }
+  return user
+}
 
 class User {
-  constructor (auth0id) {
-    // Set the auth0 to null
-    this.auth0 = null
-    this.id = null
-    this.hash = null
-    this.loggedIn = false
-    this.apitoken = null
-    this.oldTokens = []
-
-    /*
-     * Check to see if we've been passed an object,
-     * if so then we've been given the whole auth0
-     * object and can go about storing it. Otherwise
-     * we have to try and get the auth0 object from
-     * having what we assume is just the id.
-     */
+  async get (auth0id) {
+    //  Grab the id from the user object or a string
+    let id = null
     if (typeof auth0id === 'object') {
-      this.auth0 = auth0id
-      this.id = auth0id.id
-      this.hash = crypto.createHash('md5').update(this.id).digest('hex')
-
-      /*
-      * Now we have the auth0 go and check to see if
-      * we have data for it in the data store.
-      */
-      if (!this.userExists() && this.id !== null) {
-        this.generateToken()
-        this.save()
-      }
+      id = auth0id.id
     } else {
-      //  Assume we've been given a hash
-      this.hash = auth0id
+      id = auth0id
     }
 
-    this.load()
+    //  Go and get the user from Auth0
+    const user = await getUser(id)
+    return user
   }
 
-  userExists () {
-    const userDir = process.cwd()
-    if (!fs.existsSync(`${userDir}/app/data`)) {
-      fs.mkdirSync(`${userDir}/app/data`)
-    }
-    if (!fs.existsSync(`${userDir}/app/data/users`)) {
-      fs.mkdirSync(`${userDir}/app/data/users`)
-    }
-    return fs.existsSync(`${userDir}/app/data/users/${this.hash}.json`)
-  }
-
-  get () {
-    console.log(`Getting user: ${this.id}`)
-    return 'fnord'
-  }
-
-  /*
-   * This checks to see if there are any other users, if not
-   * then we are the very first user, make us the admin user
-   */
-  firstUser () {
-    const userDir = `${process.cwd()}/app/data/users`
-    if (!fs.existsSync(userDir)) return false
-    const users = fs.readdirSync(userDir).filter(file => {
-      const fileFragments = file.split('.')
-      if (fileFragments.length !== 2) return false
-      if (fileFragments[1] === 'json') return true
-    })
-    return users.length === 0
-  }
-
-  /*
-   * This will generate a new api token for the user. It will
-   * check to see if there's an old on and if so it'll add them
-   * to the list of older tokens
-   */
-  generateToken () {
-    const newToken = crypto
-      .createHash('md5')
-      .update(`${Math.random()}`)
-      .digest('hex')
-    let oldToken = null
-    if (
-      'apitoken' in this &&
-      this.apitoken !== null &&
-      this.apitoken !== undefined
-    ) {
-      if (
-        !('oldTokens' in this) ||
-        this.oldTokens === null ||
-        this.oldTokens === undefined
-      ) {
-        this.oldTokens = []
-      }
-      oldToken = this.apitoken
-      this.oldTokens.push(oldToken)
-    }
-    this.apitoken = newToken
-
-    //  TODO: we need to tell the graphQL server, if it's set up
-    //  that this is a valid token. Rather like this...
-    //  GraphQL.registerApiToken(newToken, oldToken)
-  }
-
-  save () {
-    //  Do the dates/times
-    if (!('created' in this)) this.created = new Date().getTime()
-    this.updated = new Date().getTime()
-
-    //  Set user roles
-    if (!('developer' in this)) this.developer = true
-    if (!('staff' in this)) this.staff = false
-    if (!('admin' in this)) this.admin = false
-    if (this.firstUser()) {
-      this.admin = true
-    }
-
-    //  Make sure we have an apitoken
-    if (!('apitoken' in this)) {
-      this.generateToken()
-    }
-
-    const userDir = `${process.cwd()}/app/data/users`
-    const userJSONPretty = JSON.stringify(this, null, 4)
-    fs.writeFileSync(`${userDir}/${this.hash}.json`, userJSONPretty, 'utf-8')
-  }
-
-  load () {
-    const userDir = `${process.cwd()}/app/data/users`
-    const userFile = `${userDir}/${this.hash}.json`
-    if (this.hash !== null && fs.existsSync(userFile)) {
-      const userPretty = fs.readFileSync(userFile, 'utf-8')
-      const user = JSON.parse(userPretty)
-      //  You would think destructuring but nope!
-      this.id = user.id
-      this.hash = user.hash
-      this.auth0 = user.auth0
-      this.created = user.created
-      this.updated = user.updated
-      this.developer = user.developer
-      this.staff = user.staff
-      this.admin = user.admin
-      this.apitoken = user.apitoken
-      this.oldTokens = user.oldTokens
-      this.loggedIn = true
-    }
+  async setRoles (id, roles) {
+    const user = await setRoles(id, roles)
+    return user
   }
 }
 module.exports = User

@@ -1,25 +1,26 @@
 <nav class="header">
   <div class="nav-wrapper">
-    <a href="/" class="brand-logo left">Dashboard</a>
+    <a href="/" class="brand-logo left">WCMA</a>
     {{#if user}}
     <ul>
+
+      {{#if user.roles.isDeveloper}}
       <li>
         <a href="/developer">Developer</a>
       </li>
-      {{#if user.admin}}
+      {{/if}} {{#if user.roles.isAdmin}}
       <li>
         <a href="/config">Config</a>
       </li>
       {{/if}}
     </ul>
 
-    {{/if}} {{#if user}}
     <ul class="right">
       <li>
         <a href="/settings">
-          <img class="avatar" src="{{user.auth0.picture}}" />{{user.auth0.nickname}}</a>
+          <img class="avatar" src="{{user.picture}}" />{{user.nickname}}</a>
       </li>
-      {{#if user.admin}}
+      {{#if user.roles.isAdmin}}
       <li>
         <a href="/admin">Admin</a>
       </li>
