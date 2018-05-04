@@ -333,7 +333,6 @@ if ('auth0' in global.config) {
 app.use('/', routes)
 
 app.use((request, response) => {
-  console.error('ERROR!!')
   response.status(404).render('static/404')
 })
 
