@@ -5,17 +5,25 @@
   {{> head}}
 </head>
 
-<body>
+<body class="cover" style="background-image: url(/images/cover_001.jpg);">
 
   {{> nav}}
 
   <div class="wrapper">
-    <div class="container">
+    <div class="container admin-layout documentaion">
 
-      <h1>Developer</h1>
+      <h1>Developer Documention</h1>
       <p>
-        Here is your API key, probably
-      </p>
+        Hello and welcome to the developer portal for the WCMA api, below you will find your API key and the details you need to
+        start making calls to our GraphQL server.
+        <form>
+          <table class="api">
+            <tr>
+              <td>API token:</td>
+              <td class="token">{{user.apitoken}}</td>
+            </tr>
+          </table>
+        </form>
     </div>
   </div>
 
