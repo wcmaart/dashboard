@@ -1,9 +1,17 @@
+const decortation = require('../../modules/decoration')
+
 exports.index = (req, res) => {
-  req.templateValues.msg = 'hello world'
-  return res.render('main/index', req.templateValues)
+  if (req.user === null) {
+    const design = decortation.pickLoggedOutDesign()
+    req.templateValues.design = design
+    return res.render('main/pleaselogin', req.templateValues)
+  }
+
+  return res.redirect('/developer')
 }
 
 exports.wait = (req, res) => {
-  req.templateValues.msg = 'hello world'
+  const design = decortation.pickLoggedOutDesign()
+  req.templateValues.design = design
   return res.render('config/wait', req.templateValues)
 }

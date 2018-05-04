@@ -1,21 +1,23 @@
 <html>
 
 <head>
-  <title>Please wait</title>
-  <meta http-equiv="refresh" content="3;url=/"></meta>
+  <title>WCMA</title>
   {{> head}}
 </head>
 
-<body>
+<body class="cover" style="background-image: url(/images/{{design.cover}});">
 
   {{> nav}}
 
-  <div class="container homepage">
-    <div class="welcome">
-
-      <h1>Welcome to the Dashboard</h1>
-      <p>Please
-        <a href="/login">login</a> to continue</p>
+  <div class="wrapper">
+    <div class="container holding">
+      <div class="splash" style='background: {{design.bgcolor}}; color: {{design.fgcolor}}'>
+        <h1>Wecome to the dashboard</h1>
+        <p>
+          Please
+          <a href="/login">login</a> to get started
+        </p>
+      </div>
     </div>
   </div>
 
