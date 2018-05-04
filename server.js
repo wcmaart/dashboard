@@ -173,6 +173,24 @@ if (skipBuild === false) {
 
   //  Compile node files
   spawnSync('npx', ['babel', 'src', '--out-dir', 'app'])
+
+  //  Copy over all the png, xml and ico files for the icons that sit in
+  //  the public dir
+  const moveFiles = fs
+    .readdirSync(path.join(rootDir, '/src/public'))
+    .filter(file => {
+      return file.split('.').length > 1
+    })
+    .filter(file => {
+      let extension = file.split('.')
+      extension = extension.pop()
+      return ['png', 'xml', 'ico', 'json'].includes(extension)
+    })
+  moveFiles.forEach(file => {
+    const source = path.join(rootDir, '/src/public', file)
+    const target = path.join(rootDir, '/app/public', file)
+    fs.copyFileSync(source, target)
+  })
 }
 
 // ########################################################################
