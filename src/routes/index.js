@@ -26,6 +26,8 @@ const user = require('./user')
 router.use(function (req, res, next) {
   req.templateValues = {}
   req.config = global.config
+  req.templateValues.config = req.config
+  req.templateValues.NODE_ENV = process.env.NODE_ENV
   if (req.user === undefined) {
     req.user = null
   } else {
@@ -104,6 +106,7 @@ router.get('/admin/users', ensureLoggedIn, admin.users)
 router.get('/admin/user/:id', ensureLoggedIn, admin.user)
 router.post('/admin/user/:id', ensureLoggedIn, admin.user)
 router.get('/config', ensureLoggedIn, config.index)
+router.post('/config', ensureLoggedIn, config.index)
 router.get('/developer', ensureLoggedIn, developer.index)
 router.get('/settings', ensureLoggedIn, user.settings)
 router.get('/wait', main.wait)
