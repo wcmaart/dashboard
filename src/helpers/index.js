@@ -98,3 +98,8 @@ exports.timePretty = t => {
   if (t === null || t === undefined) return ''
   return moment(t).format('dddd, MMMM Do YYYY, h:mm:ss a')
 }
+
+exports.timeAgo = backThen => {
+  if (backThen === null || backThen === undefined) return ''
+  return moment(backThen).fromNow()
+}

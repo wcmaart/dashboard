@@ -10,7 +10,7 @@
   {{> nav}}
 
   <div class="wrapper">
-    <div class="container admin-layout">
+    <div class="container admin-layout documentation">
 
       <h1>Config</h1>
       <h2>GraphQL</h2>
@@ -19,6 +19,9 @@
         Congratulations graphQL has been set up, visit it here:
         <a href="{{config.graphql.host}}/playground">{{config.graphql.host}}/playground</a>, or check it's
         <a href="/developer/graphql/status">status here</a>.
+      </p>
+      <p>
+        You can reconfigure it below is needed.
       </p>
       {{else}}
       <p>
@@ -37,6 +40,7 @@
         <br /> No:
         <code>https://somedomain.com/graphql</code>. {{/ifEqual}}
       </p>
+      {{/if}}
       <p>
         <form method="post">
           <table>
@@ -56,7 +60,6 @@
         </form>
 
       </p>
-      {{/if}}
     </div>
   </div>
 

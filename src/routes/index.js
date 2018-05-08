@@ -108,6 +108,8 @@ router.post('/admin/user/:id', ensureLoggedIn, admin.user)
 router.get('/config', ensureLoggedIn, config.index)
 router.post('/config', ensureLoggedIn, config.index)
 router.get('/developer', ensureLoggedIn, developer.index)
+router.get('/developer/graphql', ensureLoggedIn, developer.graphql)
+router.get('/developer/graphql/status', ensureLoggedIn, developer.status.graphql)
 router.get('/settings', ensureLoggedIn, user.settings)
 router.get('/wait', main.wait)
 
