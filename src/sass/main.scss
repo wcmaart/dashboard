@@ -241,4 +241,35 @@ body {
       }
     }
   }
+  .connections {
+    background: #fcfcfc;
+    min-height: 32px;
+    line-height: 32px;
+    height: auto;
+    position: relative;
+    width: 100%;
+    border-bottom: 1px solid #CDDAD0;
+    font-size: 0.8em;
+    margin-bottom: 1rem;
+    .graphQL {
+      float: right;
+      margin-right: 2em;
+      cursor: pointer;
+      .alert {
+        color: red;
+        font-weight: bold;
+      }
+      .warn {
+        color: orange;
+        font-weight: bold;
+      }
+      .good {
+        color: green;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+    }
+  }
 }
