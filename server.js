@@ -42,11 +42,27 @@ console.log(`server.js exists in this directory: ${rootDir}`.help)
  * Check to see if we have been passed in command line parameters to define
  * the port, host, environment and if we want to skip any build steps
  */
-const argOptionDefinitions = [
-  { name: 'port', alias: 'p', type: Number },
-  { name: 'host', alias: 'h', type: String },
-  { name: 'env', alias: 'e', type: String },
-  { name: 'skipBuild', alias: 's', type: Boolean, defaultOption: false }
+const argOptionDefinitions = [{
+  name: 'port',
+  alias: 'p',
+  type: Number
+},
+{
+  name: 'host',
+  alias: 'h',
+  type: String
+},
+{
+  name: 'env',
+  alias: 'e',
+  type: String
+},
+{
+  name: 'skipBuild',
+  alias: 's',
+  type: Boolean,
+  defaultOption: false
+}
 ]
 const commandLineArgs = require('command-line-args')
 const argOptions = commandLineArgs(argOptionDefinitions)
@@ -158,9 +174,6 @@ if (skipBuild === false) {
     'app/templates',
     '--copy-files'
   ])
-
-  //  Compile node files
-  spawnSync('npx', ['babel', 'src', '--out-dir', 'app'])
 
   // Copy template files
   spawnSync('npx', [
@@ -321,16 +334,15 @@ app.use(
 
 if ('auth0' in global.config) {
   // Configure Passport to use Auth0
-  const strategy = new Auth0Strategy(
-    {
-      domain: global.config.auth0.AUTH0_DOMAIN,
-      clientID: global.config.auth0.AUTH0_CLIENT_ID,
-      clientSecret: global.config.auth0.AUTH0_SECRET,
-      callbackURL: global.config.auth0.AUTH0_CALLBACK_URL
-    },
-    (accessToken, refreshToken, extraParams, profile, done) => {
-      return done(null, profile)
-    }
+  const strategy = new Auth0Strategy({
+    domain: global.config.auth0.AUTH0_DOMAIN,
+    clientID: global.config.auth0.AUTH0_CLIENT_ID,
+    clientSecret: global.config.auth0.AUTH0_SECRET,
+    callbackURL: global.config.auth0.AUTH0_CALLBACK_URL
+  },
+  (accessToken, refreshToken, extraParams, profile, done) => {
+    return done(null, profile)
+  }
   )
 
   passport.use(strategy)
@@ -408,8 +420,8 @@ if (process.env.NODE_ENV === 'development') {
     console.log('')
     console.log(
       '>> You can also find the value in the '.info +
-        'config.json'.bold.data +
-        ' file'.info
+      'config.json'.bold.data +
+      ' file'.info
     )
     console.log('')
   }
