@@ -1,0 +1,7 @@
+<div class="connections">
+  <div class="graphQL">
+    GraphQL: {{#if config.graphql.host}}
+    <a href="/developer/graphql/status">{{{graphQLStatus}}}</a> {{else}} {{#if user.roles.isAdmin}}
+    <a href="/config">Not configured</a>{{else}}Not configured{{/if}} {{/if}}
+  </div>
+</div>

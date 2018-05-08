@@ -428,3 +428,6 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 http.createServer(app).listen(process.env.PORT)
+
+const pingtools = require('./app/modules/pingtools')
+pingtools.startPinging()
