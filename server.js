@@ -184,6 +184,15 @@ if (skipBuild === false) {
     '--copy-files'
   ])
 
+  // Copy naked css files
+  spawnSync('npx', [
+    'babel',
+    'src/public/css',
+    '--out-dir',
+    'app/public/css',
+    '--copy-files'
+  ])
+
   //  Compile node files
   spawnSync('npx', ['babel', 'src', '--out-dir', 'app'])
 

@@ -169,6 +169,10 @@ body {
           overflow: auto;
           font-size: 1.2rem
         }
+        &.terminal {
+          background: #1E1E1E;
+          color: #E1E1E1;
+        }
       }
       table.api {
         font-size: 1.6rem;

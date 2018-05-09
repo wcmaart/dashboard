@@ -2,10 +2,10 @@ const request = require('request-promise')
 class Queries {
   constructor () {
     this.hello = `query {
-      hello[[]] {
-        there
-      }
-    }`
+  hello[[]] {
+    there
+  }
+}`
   }
 
   get (query, filter) {
