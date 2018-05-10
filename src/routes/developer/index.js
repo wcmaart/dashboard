@@ -1,8 +1,11 @@
+const Queries = require('../../modules/queries')
+
 exports.index = (req, res) => {
   return res.render('developer/index', req.templateValues)
 }
 
 exports.graphql = (req, res) => {
+  req.templateValues.queries = new Queries()
   return res.render('developer/graphql', req.templateValues)
 }
 
