@@ -9,6 +9,7 @@ const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn()
 // Break out all the seperate parts of the site
 /* eslint-disable import/no-unresolved */
 const admin = require('./admin')
+const api = require('./api')
 const main = require('./main')
 const config = require('./config')
 const developer = require('./developer')
@@ -112,6 +113,8 @@ router.get('/developer/graphql', ensureLoggedIn, developer.graphql)
 router.get('/developer/graphql/status', ensureLoggedIn, developer.status.graphql)
 router.get('/settings', ensureLoggedIn, user.settings)
 router.get('/wait', main.wait)
+
+router.post('/api/checkToken', api.checkToken)
 
 // ############################################################################
 //
