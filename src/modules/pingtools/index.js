@@ -1,4 +1,4 @@
-const Queries = require('../queries')
+const Queries = require('../../classes/queries')
 
 const pingGraphQL = async () => {
   const ping = {}

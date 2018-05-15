@@ -3,7 +3,7 @@ const passport = require('passport')
 const router = express.Router()
 const fs = require('fs')
 const path = require('path')
-const User = require('../modules/user')
+const User = require('../classes/user')
 const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn()
 
 // Break out all the seperate parts of the site

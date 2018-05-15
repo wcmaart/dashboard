@@ -1,5 +1,5 @@
 const request = require('request-promise')
-const auth0 = require('../auth0')
+const auth0 = require('../../modules/auth0')
 
 class Users {
   async get (role = null, page = 1, perPage = 50) {

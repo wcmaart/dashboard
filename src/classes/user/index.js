@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
 const request = require('request-promise')
-const auth0 = require('../auth0')
+const auth0 = require('../../modules/auth0')
 
 const rootDir = path.join(__dirname, '../../..')
 
