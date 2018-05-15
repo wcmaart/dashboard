@@ -165,6 +165,11 @@ exports.graphQLQuery = (query, filter) => {
   return Prism.highlight(rtn, Prism.languages.graphql, 'graphql')
 }
 
+const curlCode = (code) => {
+  return Prism.highlight(code, Prism.languages.bash, 'bash')
+}
+exports.curlCode = curlCode
+
 exports.curlQuery = (query, filter, graphQL, token) => {
   let newQuery = showQuery(query, filter)
   //  We are going to do an ugly thing here to remove the
@@ -190,8 +195,13 @@ ${newQuery}
 }\\"}" \\
 --compressed \\
 ${graphQL}/graphql`
-  return Prism.highlight(rtn, Prism.languages.bash, 'bash')
+  return curlCode(rtn)
 }
+
+const nodeCode = (code) => {
+  return Prism.highlight(code, Prism.languages.javascript, 'javascript')
+}
+exports.nodeCode = nodeCode
 
 exports.nodeQuery = (query, filter, graphQL, token) => {
   let newQuery = showQuery(query, filter)
@@ -231,5 +241,5 @@ request(
 )
 `
 
-  return Prism.highlight(rtn, Prism.languages.javascript, 'javascript')
+  return nodeCode(rtn)
 }
