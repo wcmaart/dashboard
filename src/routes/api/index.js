@@ -94,7 +94,8 @@ exports.checkToken = async (req, res) => {
   if (foundToken !== true) {
     const error = {
       status: 'error',
-      msg: `Token not found`
+      msg: `Token not found, valid for the number of seconds shown in expires_in`,
+      expires_in: (60 * 20 * 1)
     }
     res.setHeader('Content-Type', 'application/json')
     res.status(401)
@@ -104,7 +105,8 @@ exports.checkToken = async (req, res) => {
 
   const rtnJSON = {
     status: 'ok',
-    msg: `Token found`
+    msg: `Token found, valid for the number of seconds shown in expires_in`,
+    expires_in: (60 * 60 * 24)
   }
   res.setHeader('Content-Type', 'application/json')
   res.send(JSON.stringify(rtnJSON))
