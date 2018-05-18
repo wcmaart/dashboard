@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-constructor */
 const fs = require('fs')
 const path = require('path')
 const crypto = require('crypto')
@@ -6,9 +7,12 @@ const auth0 = require('../../modules/auth0')
 
 const rootDir = path.join(__dirname, '../../..')
 
-/*
+/**
  * This will go and get the user from Auth0, this is the object
  * that we want to use everywhere else in the system
+ * @param {string} id The id of the user we want to get information from Auth0 about.
+ * @returns {json} A json representation of a user
+ * @access private
  */
 const getUserSync = async id => {
   const auth0Token = await auth0.getAuth0Token()
@@ -31,8 +35,13 @@ const getUserSync = async id => {
   return user
 }
 
-/*
- * This will set a developer API token on the user
+/**
+ * This will generate a new developer API token for a user and then send that value
+ * to be saved in Auth0
+ * @param {id} string The id of a user
+ * @returns {json|Array} Returns a json representation of the user, with the new
+ * token included, or an Array with error information in if it failed.
+ * @access private
  */
 const setApiToken = async id => {
   const auth0Token = await auth0.getAuth0Token()
@@ -63,6 +72,19 @@ const setApiToken = async id => {
   return user
 }
 
+/**
+ * This allows us to set roles on a user, normally the roles follow a format such as
+ * {
+ *    isAdmin: false,
+ *    isStaff: false,
+ *    isDeveloper: true
+ * }
+ * @param {string} id The id of a user
+ * @param {json} roles A json object holding the new roles for a user we want to set
+ * @returns {json|Array} Returns a json representation of the user, with the new
+ * token included, or an Array with error information in if it failed.
+ * @access private
+ */
 const setRoles = async (id, roles) => {
   const auth0Token = await auth0.getAuth0Token()
   const payload = {
@@ -88,6 +110,16 @@ const setRoles = async (id, roles) => {
   return user
 }
 
+/**
+ * This method gets a user, in theory this is a wrapper for fetching the user data
+ * from somewhere else. But it also does a couple more useful things, such as
+ * determining if this is the _Very first_ user, in which case we set their roles
+ * slightly differently, in that they are automatically an Admin user. This will
+ * also assign a developer token to them if they don't have one.
+ * @param {string} id The id of the user we want to get information from Auth0 about.
+ * @returns {json} A json representation of a user
+ * @access private
+ */
 const getUser = async id => {
   let user = await getUserSync(id)
   //  Check to see if we have set the admin user yet
@@ -123,7 +155,26 @@ const getUser = async id => {
   return user
 }
 
+/** Class representing a single user. */
 class User {
+  /**
+   * Because we need to pass back a user object right away we return an
+   * empty user. You then need to call the async method 'get' to fetch
+   * the details we want. The User object doesn't contain any values of the user
+   * (yet) only methods that return json representations of the user.
+   */
+  constructor () {}
+
+  /**
+   * When we use auth0 to log a user in we get a JSON object back with _some_ of the user's
+   * details in, unfortunately not _all_ the details we need. We use this method to pass in
+   * either a user's id, or the Auth0 JSON object we got back from logging in, and ask the
+   * Auht0 API for the details we actually want.
+   * @param {string|json} auth0id The id (string) of a user, or a whole auth0 json
+   * representation of a user.
+   * @returns {json} A better json representation of the user with the `user_metadata` field
+   * that we want, that includes the user's roles and developer api token
+   */
   async get (auth0id) {
     //  Grab the id from the user object or a string
     let id = null
@@ -138,6 +189,12 @@ class User {
     return user
   }
 
+  /**
+   *
+   * @param {string} id The id of a user
+   * @param {json} roles The roles we wish to set on a user as a json object
+   * @returns {json} A json representation of a user
+   */
   async setRoles (id, roles) {
     const user = await setRoles(id, roles)
     return user
