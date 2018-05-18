@@ -3,6 +3,7 @@
  * @module modules/auth0
  */
 const request = require('request-promise')
+const Config = require('../../classes/config')
 
 /**
  * Gets us the token we need to call further API methods on the Auth0 endpoint
@@ -16,22 +17,29 @@ exports.getAuth0Token = async () => {
   //  the current time is less than that we are good.
   if ('auth0' in global && 'token' in global.auth0) {
     if (new Date().getTime() < global.auth0.expires) {
-      console.log('Not expired yet!')
       return global.auth0.token
     }
   }
 
+  const config = new Config()
+  const auth0 = config.get('auth0')
+  if (auth0 === null) {
+    return [
+      'No auth0 set in config'
+    ]
+  }
+
   var options = {
     method: 'POST',
-    url: `https://${global.config.auth0.AUTH0_DOMAIN}/oauth/token`,
+    url: `https://${auth0.AUTH0_DOMAIN}/oauth/token`,
     headers: {
       'content-type': 'application/json'
     },
     body: {
       grant_type: 'client_credentials',
-      client_id: global.config.auth0.AUTH0_CLIENT_ID,
-      client_secret: global.config.auth0.AUTH0_SECRET,
-      audience: `https://${global.config.auth0.AUTH0_DOMAIN}/api/v2/`
+      client_id: auth0.AUTH0_CLIENT_ID,
+      client_secret: auth0.AUTH0_SECRET,
+      audience: `https://${auth0.AUTH0_DOMAIN}/api/v2/`
     },
     json: true
   }

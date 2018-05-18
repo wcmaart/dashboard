@@ -1,15 +1,20 @@
 const request = require('request-promise')
 const auth0 = require('../../modules/auth0')
+const Config = require('../../classes/config')
 
 exports.index = (req, res) => {
   if (req.user.roles.isAdmin !== true && req.user.roles.isStaff !== true) {
     return res.redirect('/')
   }
 
+  const config = new Config()
+  if (config.get('handshake') === null) {
+    return res.redirect('/')
+  }
   //  This is the cURL code for checking a developer token
   const curlCode = `curl \\
 -H "Content-Type: application/json" \\
--H "Authorization: bearer ${global.config.handshake}" \\
+-H "Authorization: bearer ${config.get('handshake')}" \\
 -d '{"token": "${req.user.apitoken}"}' \\
 -X POST http://${req.headers.host}/api/checkToken`
 
@@ -31,7 +36,7 @@ request(
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      Authorization: 'bearer ${global.config.handshake}'
+      Authorization: 'bearer ${config.get('handshake')}'
     },
     json: payload
   },
@@ -70,8 +75,10 @@ exports.checkToken = async (req, res) => {
     return
   }
 
+  const config = new Config()
+
   //  Check we have a handshake token against which to check
-  if (!('config' in global) || !('handshake' in global.config)) {
+  if (config.get('handshake') === null) {
     const error = {
       status: 'error',
       msg: `The API has not been set up yet`
@@ -84,24 +91,13 @@ exports.checkToken = async (req, res) => {
 
   //  See if the bearer token matches our handshake token
   const authSplit = req.headers.authorization.split(' ')
-  if (authSplit.length !== 2 || authSplit[0].toLowerCase() !== 'bearer' || authSplit[1] !== global.config.handshake) {
+  if (authSplit.length !== 2 || authSplit[0].toLowerCase() !== 'bearer' || authSplit[1] !== config.get('handshake')) {
     const error = {
       status: 'error',
       msg: `Incorrect authorization token`
     }
     res.setHeader('Content-Type', 'application/json')
     res.status(401)
-    res.send(JSON.stringify(error))
-    return
-  }
-
-  if (!('config' in global) || !('handshake' in global.config)) {
-    const error = {
-      status: 'error',
-      msg: `The API has not been set up yet`
-    }
-    res.setHeader('Content-Type', 'application/json')
-    res.status(500)
     res.send(JSON.stringify(error))
     return
   }
@@ -118,6 +114,18 @@ exports.checkToken = async (req, res) => {
     return
   }
 
+  const auth0info = config.get('auth0')
+  if (auth0info === null) {
+    const error = {
+      status: 'error',
+      msg: `auth0 is not set up`
+    }
+    res.setHeader('Content-Type', 'application/json')
+    res.status(401)
+    res.send(JSON.stringify(error))
+    return
+  }
+
   //  Now we know everything is valid, we can test to see if the token exists
   const auth0Token = await auth0.getAuth0Token()
   const qs = {
@@ -126,7 +134,7 @@ exports.checkToken = async (req, res) => {
     search_engine: 'v2'
   }
   const foundToken = await request({
-    url: `https://${global.config.auth0.AUTH0_DOMAIN}/api/v2/users`,
+    url: `https://${auth0info.AUTH0_DOMAIN}/api/v2/users`,
     method: 'GET',
     headers: {
       'content-type': 'application/json',
@@ -166,7 +174,3 @@ exports.checkToken = async (req, res) => {
   res.setHeader('Content-Type', 'application/json')
   res.send(JSON.stringify(rtnJSON))
 }
-
-/* Example asking for a token
-curl -H "Content-Type: application/json" -H "Authorization: bearer 6c36dcd96d6346ac6d376d9d7742366f" -d '{"token": "7f4aca5f014348fef67943bc54f3cbce"}' -X POST http://localhost:4002/api/checkToken
-*/
