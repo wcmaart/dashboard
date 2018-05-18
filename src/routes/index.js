@@ -114,6 +114,7 @@ router.get('/developer/graphql/status', ensureLoggedIn, developer.status.graphql
 router.get('/settings', ensureLoggedIn, user.settings)
 router.get('/wait', main.wait)
 
+router.get('/api', ensureLoggedIn, api.index)
 router.post('/api/checkToken', api.checkToken)
 
 // ############################################################################
