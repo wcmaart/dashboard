@@ -1,11 +1,8 @@
 /* eslint-disable no-useless-constructor */
-const fs = require('fs')
-const path = require('path')
 const crypto = require('crypto')
 const request = require('request-promise')
 const auth0 = require('../../modules/auth0')
-
-const rootDir = path.join(__dirname, '../../..')
+const Config = require('../config')
 
 /**
  * This will go and get the user from Auth0, this is the object
@@ -17,8 +14,15 @@ const rootDir = path.join(__dirname, '../../..')
 const getUserSync = async id => {
   const auth0Token = await auth0.getAuth0Token()
   const payload = {}
+
+  const config = new Config()
+  const auth0info = config.get('auth0')
+  if (auth0info === null) {
+    return ['error', 'No auth0 set in config']
+  }
+
   const user = await request({
-    url: `https://${global.config.auth0.AUTH0_DOMAIN}/api/v2/users/${id}`,
+    url: `https://${auth0info.AUTH0_DOMAIN}/api/v2/users/${id}`,
     method: 'GET',
     headers: {
       'content-type': 'application/json',
@@ -54,8 +58,15 @@ const setApiToken = async id => {
       apitoken: newToken
     }
   }
+
+  const config = new Config()
+  const auth0info = config.get('auth0')
+  if (auth0info === null) {
+    return ['error', 'No auth0 set in config']
+  }
+
   const user = await request({
-    url: `https://${global.config.auth0.AUTH0_DOMAIN}/api/v2/users/${id}`,
+    url: `https://${auth0info.AUTH0_DOMAIN}/api/v2/users/${id}`,
     method: 'PATCH',
     headers: {
       'content-type': 'application/json',
@@ -92,8 +103,15 @@ const setRoles = async (id, roles) => {
       roles: roles
     }
   }
+
+  const config = new Config()
+  const auth0info = config.get('auth0')
+  if (auth0info === null) {
+    return ['error', 'No auth0 set in config']
+  }
+
   const user = await request({
-    url: `https://${global.config.auth0.AUTH0_DOMAIN}/api/v2/users/${id}`,
+    url: `https://${auth0info.AUTH0_DOMAIN}/api/v2/users/${id}`,
     method: 'PATCH',
     headers: {
       'content-type': 'application/json',
@@ -121,20 +139,19 @@ const setRoles = async (id, roles) => {
  * @access private
  */
 const getUser = async id => {
+  const config = new Config()
   let user = await getUserSync(id)
+
   //  Check to see if we have set the admin user yet
   //  if not then we need to do that now
-  if (!('adminSet' in global.config) || global.config.adminSet === false) {
+  if (config.get('adminSet') === null || config.get('adminSet') === false) {
     const roles = {
       isAdmin: true,
       isStaff: true,
       isDeveloper: true
     }
     user = await setRoles(id, roles)
-    global.config.adminSet = true
-    const configFile = path.join(rootDir, 'config.json')
-    const configJSONPretty = JSON.stringify(global.config, null, 4)
-    fs.writeFileSync(configFile, configJSONPretty, 'utf-8')
+    config.set('adminSet', true)
   }
 
   //  Check to see if any roles have been set on the user, if not then

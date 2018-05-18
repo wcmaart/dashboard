@@ -4,29 +4,23 @@ const GraphQL = require('../../classes/graphQL')
 const pingGraphQL = async () => {
   const ping = {}
 
-  if ('graphql' in global.config) {
-    const queries = new Queries()
-    const graphQL = new GraphQL()
-    const payload = {
-      query: queries.get('hello', '')
-    }
-    const startms = new Date().getTime()
-    const results = await graphQL.fetch(payload)
-    const endms = new Date().getTime()
-    ping.ms = endms - startms
-    ping.timestamp = endms
-    //  If we got an array back, it means we had an error
-    //  and we should count that as a miss, otherwise assume
-    //  all is good
-    if (Array.isArray(results)) {
-      ping.valid = false
-    } else {
-      ping.valid = true
-    }
-  } else {
-    ping.ms = 0
-    ping.timestamp = new Date().getTime()
+  const queries = new Queries()
+  const graphQL = new GraphQL()
+  const payload = {
+    query: queries.get('hello', '')
+  }
+  const startms = new Date().getTime()
+  const results = await graphQL.fetch(payload)
+  const endms = new Date().getTime()
+  ping.ms = endms - startms
+  ping.timestamp = endms
+  //  If we got an array back, it means we had an error
+  //  and we should count that as a miss, otherwise assume
+  //  all is good
+  if (Array.isArray(results)) {
     ping.valid = false
+  } else {
+    ping.valid = true
   }
 
   //  Pop the updated information into the global array. Note
@@ -41,6 +35,7 @@ const pingGraphQL = async () => {
   global.graphqlping.unshift(ping)
   global.graphqlping = global.graphqlping.slice(0, 30)
 }
+exports.pingGraphQL = pingGraphQL
 
 exports.startPinging = () => {
   //  Ping GrahpQL

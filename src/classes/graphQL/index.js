@@ -1,5 +1,6 @@
 /* eslint-disable no-useless-constructor */
 const request = require('request-promise')
+const Config = require('../../classes/config')
 
 /** Class allowing us to connect to a GraphQL server. */
 class GraphQL {
@@ -17,12 +18,18 @@ class GraphQL {
    * @returns {json|Array} The results from GraphQL as a json objects, or an array containing the error if the query failed
    */
   async fetch (payload) {
+    const config = new Config()
+    const graphql = config.get('graphql')
+    if (graphql == null) {
+      return ['error', 'No graphQL defined in config']
+    }
+
     return request({
-      url: `${global.config.graphql.host}/graphql`,
+      url: `${graphql.host}/graphql`,
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        Authorization: `bearer ${global.config.handshake}`
+        Authorization: `bearer ${config.get('handshake')}`
       },
       json: payload
     })
