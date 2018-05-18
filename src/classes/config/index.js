@@ -27,7 +27,7 @@ class Config {
   }
 
   /**
-   * This is out getter that allows us to get values from the config.
+   * This is our getter that allows us to get values from the config.
    * @param {string} key The key we want to look up in the config, this may be a top
    * level item or node, or a nested item such as 'level1.level2.level3'
    * representation of a user.
@@ -82,8 +82,10 @@ class Config {
   }
 
   /**
-   *
-   * @param {string} key This is the node path you want to set the value on
+   * This is the setter that allows us to set values on the config file. It will
+   * also automatically save it
+   * @param {string} key This is the node path you want to set the value on, can be
+   * a single top level node, i.e. 'alpha' or a full path 'alpha.beta.gamma'
    * @param {string|number|Array|object} value The value we want to set
    */
   set (key, value) {
