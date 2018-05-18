@@ -43,26 +43,26 @@ console.log(`server.js exists in this directory: ${rootDir}`.help)
  * the port, host, environment and if we want to skip any build steps
  */
 const argOptionDefinitions = [{
-    name: 'port',
-    alias: 'p',
-    type: Number
-  },
-  {
-    name: 'host',
-    alias: 'h',
-    type: String
-  },
-  {
-    name: 'env',
-    alias: 'e',
-    type: String
-  },
-  {
-    name: 'skipBuild',
-    alias: 's',
-    type: Boolean,
-    defaultOption: false
-  }
+  name: 'port',
+  alias: 'p',
+  type: Number
+},
+{
+  name: 'host',
+  alias: 'h',
+  type: String
+},
+{
+  name: 'env',
+  alias: 'e',
+  type: String
+},
+{
+  name: 'skipBuild',
+  alias: 's',
+  type: Boolean,
+  defaultOption: false
+}
 ]
 const commandLineArgs = require('command-line-args')
 const argOptions = commandLineArgs(argOptionDefinitions)
@@ -134,24 +134,6 @@ NODE_ENV=${nodeEnv}
 
 //  Now we can actually require it
 require('dotenv').config()
-
-//  We will also check for a config file, if there isn't one, we'll create
-//  it
-const configFile = path.join(rootDir, 'config.json')
-if (!fs.existsSync(configFile)) {
-  const crypto = require('crypto')
-  const handshake = crypto
-    .createHash('md5')
-    .update(`${Math.random()}`)
-    .digest('hex')
-
-  const config = {
-    handshake: handshake
-  }
-
-  const configJSONPretty = JSON.stringify(config, null, 4)
-  fs.writeFileSync(configFile, configJSONPretty, 'utf-8')
-}
 
 // ########################################################################
 /*
@@ -302,10 +284,10 @@ const http = require('http')
 const helpers = require('./app/helpers')
 const passport = require('passport')
 const Auth0Strategy = require('passport-auth0')
+const Config = require('./app/classes/config')
 
 //  Read in the config file
-const configRaw = fs.readFileSync(configFile, 'utf-8')
-global.config = JSON.parse(configRaw)
+const config = new Config()
 
 const app = express()
 const hbs = exphbs.create({
@@ -332,7 +314,7 @@ app.use(cookieParser())
 app.use(
   session({
     // Here we are creating a unique session identifier
-    secret: global.config.handshake,
+    secret: config.get('handshake'),
     resave: true,
     saveUninitialized: true,
     store: new FileStore({
@@ -340,18 +322,18 @@ app.use(
     })
   })
 )
-
-if ('auth0' in global.config) {
+const auth0 = config.get('auth0')
+if (auth0 !== null) {
   // Configure Passport to use Auth0
   const strategy = new Auth0Strategy({
-      domain: global.config.auth0.AUTH0_DOMAIN,
-      clientID: global.config.auth0.AUTH0_CLIENT_ID,
-      clientSecret: global.config.auth0.AUTH0_SECRET,
-      callbackURL: global.config.auth0.AUTH0_CALLBACK_URL
-    },
-    (accessToken, refreshToken, extraParams, profile, done) => {
-      return done(null, profile)
-    }
+    domain: auth0.AUTH0_DOMAIN,
+    clientID: auth0.AUTH0_CLIENT_ID,
+    clientSecret: auth0.AUTH0_SECRET,
+    callbackURL: auth0.AUTH0_CALLBACK_URL
+  },
+  (accessToken, refreshToken, extraParams, profile, done) => {
+    return done(null, profile)
+  }
   )
 
   passport.use(strategy)
@@ -405,9 +387,9 @@ if (process.env.NODE_ENV === 'development') {
     const opn = require('opn')
     // If there is no auth0 entry in the config file then we need
     // to pass over the handshake value
-    if (!('auth0' in global.config)) {
+    if (!('auth0' in config)) {
       opn(
-        `http://${process.env.HOST}:${process.env.PORT}?handshake=${global.config.handshake}`
+        `http://${process.env.HOST}:${process.env.PORT}?handshake=${config.handshake}`
       )
     } else {
       opn(`http://${process.env.HOST}:${process.env.PORT}`)
@@ -418,14 +400,14 @@ if (process.env.NODE_ENV === 'development') {
   console.log(
     `
 >> Welcome to the Dashboard, please visit the site however you have your host and ports setup to see it from the outside world`
-    .info
+      .info
   )
-  if (!('auth0' in global.config)) {
+  if (config.get('auth0') === null) {
     console.log(
       `>> You will be asked for a 'handshake' code while setting up the next step, please use the following value
       `.info
     )
-    console.log(global.config.handshake.bold.warn)
+    console.log(config.get('handshake').bold.warn)
     console.log('')
     console.log(
       '>> You can also find the value in the '.info +
