@@ -12,6 +12,10 @@
       <li>
         <a href="/config">Config</a>
       </li>
+      {{/if}} {{#if (or user.roles.isAdmin user.roles.isStaff)}}
+      <li>
+        <a href="/api">API</a>
+      </li>
       {{/if}}
     </ul>
 
