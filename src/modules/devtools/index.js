@@ -8,7 +8,9 @@ const sass = require('node-sass')
 
 const watchJS = () => {
   //  Watch for JS changes
-  const watcherJS = sane(path.join(rootDir, '/src'), { glob: ['**/*.js'] })
+  const watcherJS = sane(path.join(rootDir, '/src'), {
+    glob: ['**/*.js']
+  })
   watcherJS.on('change', function (filepath, root, stat) {
     console.log('updated file: ', filepath)
     spawnSync('npx', [

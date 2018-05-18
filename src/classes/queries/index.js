@@ -1,5 +1,8 @@
-const request = require('request-promise')
+/** Class representing a collection of queries. */
 class Queries {
+  /**
+   * Create a collection of queries
+   */
   constructor () {
     this.schema = `query {
   __schema {
@@ -217,27 +220,16 @@ class Queries {
 }`
   }
 
+  /**
+   *
+   * @param {string} query The name of the query, needs to match one of those defined in the constructor, i.e. 'schema', 'hello', places'
+   * @param {string} filter The filter we want to apply to the query i.e. '(limit: 20)'
+   * @returns {string|null} A representation of the query ready to be used if found, or null if not.
+   */
   get (query, filter) {
     if (!(query in this)) return null
     return this[query].replace('[[]]', filter)
   }
-
-  async fetch (payload) {
-    return request({
-      url: `${global.config.graphql.host}/graphql`,
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        Authorization: `bearer ${global.config.handshake}`
-      },
-      json: payload
-    })
-      .then(response => {
-        return response
-      })
-      .catch(error => {
-        return [error]
-      })
-  }
 }
+/** A handy query class that contains a bunch of predefined GraphQL queries */
 module.exports = Queries

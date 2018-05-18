@@ -1,15 +1,17 @@
-const Queries = require('../queries')
+const Queries = require('../../classes/queries')
+const GraphQL = require('../../classes/graphQL')
 
 const pingGraphQL = async () => {
   const ping = {}
 
   if ('graphql' in global.config) {
     const queries = new Queries()
+    const graphQL = new GraphQL()
     const payload = {
       query: queries.get('hello', '')
     }
     const startms = new Date().getTime()
-    const results = await queries.fetch(payload)
+    const results = await graphQL.fetch(payload)
     const endms = new Date().getTime()
     ping.ms = endms - startms
     ping.timestamp = endms

@@ -1,10 +1,13 @@
+/**
+ * This module allows us to grab an API token from auth0
+ * @module modules/auth0
+ */
 const request = require('request-promise')
 
-/*
- *  This goes and gets us the token we need to make further API calls
- *  TODO: We will store this token so we don't need to keep refreshing
- *  it, we'll stick it in `global` along with the expire time, and only
- *  re-fetch if we don't have a token, or it's expired.
+/**
+ * Gets us the token we need to call further API methods on the Auth0 endpoint
+ * @returns {string|Array} The bearer token used in future API calls, or an Array
+ * an error was generated.
  */
 exports.getAuth0Token = async () => {
   //  First we check to see if we already have a token and if

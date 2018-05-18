@@ -1,4 +1,4 @@
-const Queries = require('../../modules/queries')
+const Queries = require('../../classes/queries')
 
 exports.index = (req, res) => {
   return res.render('developer/index', req.templateValues)

@@ -14,7 +14,7 @@ const path = require('path')
 
 const rootDir = __dirname
 
-//  Before we do anything else we need to check that the checking
+//  Before we do anything else we need to check that the checking checks
 console.log('-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-')
 console.log('Making sure we are up to date, please wait...')
 const spawnSync = require('child_process').spawnSync
@@ -43,26 +43,26 @@ console.log(`server.js exists in this directory: ${rootDir}`.help)
  * the port, host, environment and if we want to skip any build steps
  */
 const argOptionDefinitions = [{
-  name: 'port',
-  alias: 'p',
-  type: Number
-},
-{
-  name: 'host',
-  alias: 'h',
-  type: String
-},
-{
-  name: 'env',
-  alias: 'e',
-  type: String
-},
-{
-  name: 'skipBuild',
-  alias: 's',
-  type: Boolean,
-  defaultOption: false
-}
+    name: 'port',
+    alias: 'p',
+    type: Number
+  },
+  {
+    name: 'host',
+    alias: 'h',
+    type: String
+  },
+  {
+    name: 'env',
+    alias: 'e',
+    type: String
+  },
+  {
+    name: 'skipBuild',
+    alias: 's',
+    type: Boolean,
+    defaultOption: false
+  }
 ]
 const commandLineArgs = require('command-line-args')
 const argOptions = commandLineArgs(argOptionDefinitions)
@@ -344,14 +344,14 @@ app.use(
 if ('auth0' in global.config) {
   // Configure Passport to use Auth0
   const strategy = new Auth0Strategy({
-    domain: global.config.auth0.AUTH0_DOMAIN,
-    clientID: global.config.auth0.AUTH0_CLIENT_ID,
-    clientSecret: global.config.auth0.AUTH0_SECRET,
-    callbackURL: global.config.auth0.AUTH0_CALLBACK_URL
-  },
-  (accessToken, refreshToken, extraParams, profile, done) => {
-    return done(null, profile)
-  }
+      domain: global.config.auth0.AUTH0_DOMAIN,
+      clientID: global.config.auth0.AUTH0_CLIENT_ID,
+      clientSecret: global.config.auth0.AUTH0_SECRET,
+      callbackURL: global.config.auth0.AUTH0_CALLBACK_URL
+    },
+    (accessToken, refreshToken, extraParams, profile, done) => {
+      return done(null, profile)
+    }
   )
 
   passport.use(strategy)
@@ -418,7 +418,7 @@ if (process.env.NODE_ENV === 'development') {
   console.log(
     `
 >> Welcome to the Dashboard, please visit the site however you have your host and ports setup to see it from the outside world`
-      .info
+    .info
   )
   if (!('auth0' in global.config)) {
     console.log(

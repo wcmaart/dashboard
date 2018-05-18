@@ -1,5 +1,5 @@
-const User = require('../../modules/user')
-const Users = require('../../modules/users')
+const User = require('../../classes/user')
+const Users = require('../../classes/users')
 
 exports.index = (req, res) => {
   //  Make sure we are an admin user
