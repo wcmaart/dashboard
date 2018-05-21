@@ -72,6 +72,7 @@
               <td>
                 <input type="text" name="graphql" placeholder="{{#ifEqual NODE_ENV 'development'}}http://localhost:4000{{else}}https://domain.com{{/ifEqual}}"
                   {{#if config.graphql.host}}value="{{config.graphql.host}}" {{/if}}>
+              </td>
             </tr>
             <tr>
               <td colspan="2">
@@ -83,6 +84,79 @@
         </form>
       </p>
 
+      <hr />
+
+      <h2>TMS</h2>
+      {{#if config.tms}}
+      <p>
+        These are your current TMS setups.
+      </p>
+      {{#each config.tms}}
+      <p>
+        <form method="post">
+          <input type="hidden" name="tmsstub" value="{{stub}}">
+          <table>
+            <tr>
+              <td>&nbsp;</td>
+              <td>
+                <strong>{{stub}}</strong>
+              </td>
+            </tr>
+            <tr>
+              <td>Url endpoint</td>
+              <td>
+                <input type="text" name="tmsurl" placeholder="http://tmssystem.somename.com" value="{{url}}">
+              </td>
+            </tr>
+            <tr>
+              <td>eMuseum Key</td>
+              <td>
+                <input type="text" name="key" placeholder="a1b2c3d4e5f6g7h8i9j0" value="{{key}}">
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <button type="submit" value="updatetms" name="action">Update</button>
+                <button type="submit" value="deletetms" name="action">Remove</button>
+              </td>
+            </tr>
+          </table>
+
+        </form>
+      </p>{{/each}} {{else}} {{/if}}
+      <p>
+        Please use the form below to register a new TMS system.
+      </p>
+      <p>
+        <form method="post">
+          <table>
+            <tr>
+              <td>Short name</td>
+              <td>
+                <input type="text" name="tmsstub" placeholder="i.e. a stub like 'williams', for use in urls" value="">
+              </td>
+            </tr>
+            <tr>
+              <td>Url endpoint</td>
+              <td>
+                <input type="text" name="tmsurl" placeholder="http://tmssystem.somename.com" value="">
+              </td>
+            </tr>
+            <tr>
+              <td>eMuseum Key</td>
+              <td>
+                <input type="text" name="key" placeholder="a1b2c3d4e5f6g7h8i9j0" value="">
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <button type="submit" value="updatetms" name="action">Add</button>
+              </td>
+            </tr>
+          </table>
+
+        </form>
+      </p>
     </div>
   </div>
 
