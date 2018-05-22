@@ -9,3 +9,4 @@ logs/tms
 .vscode
 
 config.json
+/package-lock.json
