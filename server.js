@@ -422,3 +422,6 @@ http.createServer(app).listen(process.env.PORT)
 
 const pingtools = require('./app/modules/pingtools')
 pingtools.startPinging()
+
+const tms = require('./app/modules/tms')
+tms.startFetching()
