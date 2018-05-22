@@ -105,6 +105,10 @@ class Config {
     rootNode[thisNode] = value
 
     //  Now save the config file
+    this.save()
+  }
+
+  save () {
     const configFile = path.join(rootDir, 'config.json')
     const configJSONPretty = JSON.stringify(this, null, 4)
     fs.writeFileSync(configFile, configJSONPretty, 'utf-8')

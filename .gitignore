@@ -3,6 +3,7 @@ node_modules
 app
 sessions
 out
+data
 logs/tms
 .env
 .pid
