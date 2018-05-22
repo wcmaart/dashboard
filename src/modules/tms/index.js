@@ -8,6 +8,10 @@ const rootDir = path.join(__dirname, '../../../data')
 
 //  This saves the TMS source image for the ID into the
 //  "perfect" folder
+//  NOTE: This doesn't handle the actual uploading of the image
+//  that happens in a seperate module than scans the folders for
+//  things that have a tmsSource set but the remote is still
+//  null
 const saveImageSource = (stub, id, source) => {
   const tmsLogger = logging.getTMSLogger()
 
@@ -18,14 +22,16 @@ const saveImageSource = (stub, id, source) => {
   if (!fs.existsSync(path.join(rootDir, 'tms', stub))) fs.mkdirSync(path.join(rootDir, 'tms', stub))
   if (!fs.existsSync(path.join(rootDir, 'tms', stub, 'perfect'))) fs.mkdirSync(path.join(rootDir, 'tms', stub, 'perfect'))
 
+  //  To keep things tidy we split the folder down into 1000s
   const subFolder = String(Math.floor(id / 1000) * 1000)
   if (!fs.existsSync(path.join(rootDir, 'tms', stub, 'perfect', subFolder))) fs.mkdirSync(path.join(rootDir, 'tms', stub, 'perfect', subFolder))
 
-  //  Now see if a file already exists, if not, then we add it
+  //  Now we are all set to go
   const filename = path.join(rootDir, 'tms', stub, 'perfect', subFolder, `${id}.json`)
   let perfectFile = {}
   let perfectFileJSONPretty = ''
 
+  //  Now see if a file already exists, if not, then we add it
   if (!fs.existsSync(filename)) {
     tmsLogger.object(`Creating perfect file for object ${id} for ${stub}`, {
       action: 'new',
@@ -43,7 +49,7 @@ const saveImageSource = (stub, id, source) => {
     fs.writeFileSync(filename, perfectFileJSONPretty, 'utf-8')
   }
 
-  //  Read in the file
+  //  Read in the file that may or may not have just been written
   const perfectFileRaw = fs.readFileSync(filename, 'utf-8')
   perfectFile = JSON.parse(perfectFileRaw)
 
@@ -56,6 +62,9 @@ const saveImageSource = (stub, id, source) => {
       stub: stub,
       source: source
     })
+    //  Shuffle the image sources into the old ones, just incase we want to
+    //  use _something_ inbetween finding out we need to refetch the image
+    //  and having actually fetched it
     perfectFile.oldTMSSource = perfectFile.source
     perfectFile.source = source
     perfectFile.oldRemote = perfectFile.remote
@@ -135,6 +144,7 @@ const fetchPage = () => {
           ms: (endTime - startTime)
         })
 
+        //  Now store that we want to get the next page
         tms.page += 1
         tms.nextFetch = new Date().getTime()
         config.save()
@@ -152,7 +162,16 @@ const fetchPage = () => {
           saveImageSource(tms.stub, record.id, record.source)
         })
       }).catch(error => {
-        console.error(error)
+        const endTime = new Date().getTime()
+        tmsLogger.object(`Failed while trying to fetch objects for ${tms.stub}, page ${tms.page}`, {
+          action: 'error',
+          page: tms.page,
+          stub: tms.stub,
+          error: error,
+          ms: (endTime - startTime)
+        })
+        tms.nextFetch = new Date().getTime() + (1000 * 60 * 5)
+        config.save()
       })
     } else {
       tmsLogger.object(`Skipping page ${tms.page} for tms ${tms.stub}, not time yet`, {
