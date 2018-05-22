@@ -55,18 +55,18 @@ const saveImageSource = (stub, id, source) => {
 
   //  Now we check to see if the tmsSource is different to the currently stored
   //  source, if so then we need to set the remote to null so we go and process it again
-  if (perfectFile.source !== source) {
+  if (perfectFile.tmsSource !== source) {
     tmsLogger.object(`New TMS source image found for ${id} for ${stub}`, {
       action: 'update',
       id: id,
       stub: stub,
-      source: source
+      tmsSource: source
     })
     //  Shuffle the image sources into the old ones, just incase we want to
     //  use _something_ inbetween finding out we need to refetch the image
     //  and having actually fetched it
     perfectFile.oldTMSSource = perfectFile.source
-    perfectFile.source = source
+    perfectFile.tmsSource = source
     perfectFile.oldRemote = perfectFile.remote
     perfectFile.remote = null
     perfectFileJSONPretty = JSON.stringify(perfectFile, null, 4)
