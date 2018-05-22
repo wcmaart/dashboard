@@ -184,7 +184,7 @@ const fetchPage = () => {
 }
 
 exports.startFetching = () => {
-  setTimeout(() => {
+  setInterval(() => {
     fetchPage()
   }, 1000 * 60)
   fetchPage()
