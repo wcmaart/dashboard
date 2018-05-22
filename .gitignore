@@ -3,7 +3,7 @@ node_modules
 app
 sessions
 out
-
+logs/tms
 .env
 .pid
 .vscode
