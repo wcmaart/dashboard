@@ -7,6 +7,10 @@ exports.index = (req, res) => {
     return res.render('main/pleaselogin', req.templateValues)
   }
 
+  //  Send staff and admin user to the stats page
+  if (req.user.roles.isStaff === true || req.user.roles.isAdmin) {
+    return res.redirect('/stats')
+  }
   return res.redirect('/developer')
 }
 

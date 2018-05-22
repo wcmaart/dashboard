@@ -9,9 +9,10 @@ const Config = require('../classes/config')
 /* eslint-disable import/no-unresolved */
 const admin = require('./admin')
 const api = require('./api')
-const main = require('./main')
 const config = require('./config')
 const developer = require('./developer')
+const main = require('./main')
+const stats = require('./stats')
 const user = require('./user')
 
 // ############################################################################
@@ -109,6 +110,7 @@ router.get('/developer', ensureLoggedIn, developer.index)
 router.get('/developer/graphql', ensureLoggedIn, developer.graphql)
 router.get('/developer/graphql/status', ensureLoggedIn, developer.status.graphql)
 router.get('/settings', ensureLoggedIn, user.settings)
+router.get('/stats', ensureLoggedIn, stats.index)
 router.get('/wait', main.wait)
 
 router.get('/api', ensureLoggedIn, api.index)

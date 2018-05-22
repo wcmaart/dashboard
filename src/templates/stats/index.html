@@ -1,0 +1,49 @@
+<html>
+
+<head>
+  <title>Dashboard - stats</title>
+  {{> head}}
+</head>
+
+<body class="cover" style="background-image: url(/images/cover_001.jpg);">
+
+  {{> nav}}
+
+  <div class="wrapper">
+    <div class="container admin-layout documentation">
+
+      <h1>Stats</h1>
+      <p>
+        This is where we keep a bunch of stats to keep an eye on how the server is running
+      </p>
+
+      <hr> {{#if tms}}
+      <h2>TMS systems</h2>
+      {{#each tms}}
+      <h4 style="margin-bottom: 1rem">{{stub}}</h4>
+      <table>
+        <tr>
+          <td style="width:20%">Total objects found so far</td>
+          <td>{{totalFiles}}</td>
+        </tr>
+        <tr>
+          <td>Objects with images</td>
+          <td>{{haveImageSources}}</td>
+        </tr>
+        <tr>
+          <td>Images uploaded</td>
+          <td>{{imagesUploaded}}</td>
+        </tr>
+        <tr>
+          <td>Results generated in</td>
+          <td>{{ms}}ms</td>
+        </tr>
+      </table>
+      {{/each}} {{/if}}
+    </div>
+  </div>
+
+  {{> tail}}
+</body>
+
+</html>
