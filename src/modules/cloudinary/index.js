@@ -176,6 +176,6 @@ const checkImages = () => {
 exports.startUploading = () => {
   setInterval(() => {
     checkImages()
-  }, 1000 * 60)
+  }, 1000 * 20)
   checkImages()
 }
