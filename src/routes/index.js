@@ -13,6 +13,7 @@ const config = require('./config')
 const developer = require('./developer')
 const main = require('./main')
 const stats = require('./stats')
+const uploadJSON = require('./uploadJSON')
 const user = require('./user')
 
 // ############################################################################
@@ -111,6 +112,8 @@ router.get('/developer/graphql', ensureLoggedIn, developer.graphql)
 router.get('/developer/graphql/status', ensureLoggedIn, developer.status.graphql)
 router.get('/settings', ensureLoggedIn, user.settings)
 router.get('/stats', ensureLoggedIn, stats.index)
+router.get('/uploadJSON', ensureLoggedIn, uploadJSON.index)
+router.post('/uploadJSON', ensureLoggedIn, uploadJSON.getfile)
 router.get('/wait', main.wait)
 
 router.get('/api', ensureLoggedIn, api.index)
