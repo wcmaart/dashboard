@@ -4,6 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const rootDir = path.join(__dirname, '../../../data')
 const cloudinary = require('cloudinary')
+const logging = require('../logging')
 
 /**
  * This method tries to grab a record of an object that has an image that needs
@@ -14,10 +15,7 @@ const cloudinary = require('cloudinary')
  * @param {String} id The id of the object we want to upload
  */
 const uploadImage = (stub, id) => {
-  //  Check to make sure the file exists
-  const subFolder = String(Math.floor(id / 1000) * 1000)
-  const filename = path.join(rootDir, 'tms', stub, 'perfect', subFolder, `${id}.json`)
-  if (!fs.existsSync(filename)) return
+  const tmsLogger = logging.getTMSLogger()
 
   //  Check to see that we have cloudinary configured
   const config = new Config()
@@ -27,6 +25,11 @@ const uploadImage = (stub, id) => {
   if (cloudinaryConfig === null) {
     return
   }
+
+  //  Check to make sure the file exists
+  const subFolder = String(Math.floor(id / 1000) * 1000)
+  const filename = path.join(rootDir, 'tms', stub, 'perfect', subFolder, `${id}.json`)
+  if (!fs.existsSync(filename)) return
 
   //  Read in the perfectFile
   const perfectFileRaw = fs.readFileSync(filename, 'utf-8')
@@ -40,17 +43,58 @@ const uploadImage = (stub, id) => {
     return tms.url
   })
   if (tmsses.length !== 1) return
-  const url = `${tmsses[0]}${perfectFile.tmsSource}`
+
+  //  Swap the tumbnail version of the image url for the preview url
+  const previewUrl = perfectFile.tmsSource.split('/')
+  previewUrl.pop()
+  previewUrl.push('preview')
+  const url = `${tmsses[0]}${previewUrl.join('/')}`
   //  Set up cloudinary
   cloudinary.config(cloudinaryConfig)
+
+  const startTime = new Date().getTime()
+  tmsLogger.object(`Uploading image for object ${id} for ${stub}`, {
+    action: 'uploadImage',
+    id: id,
+    stub: stub,
+    source: url
+  })
+
   cloudinary.uploader.upload(url, (result) => {
-    perfectFile.remote = {
-      public_id: result.public_id,
-      version: result.version,
-      signature: result.signature,
-      width: result.width,
-      height: result.height,
-      format: result.format
+    //  Check to see if we had an error, if so we add that to the perfect file
+    //  instead, so maybe we can go back and retry them
+    const endTime = new Date().getTime()
+    if ('error' in result) {
+      perfectFile.remote = {
+        status: 'error',
+        message: result.error.message,
+        http_code: result.error.https_code
+      }
+      tmsLogger.object(`Failed uploading image for object ${id} for ${stub}`, {
+        action: 'error',
+        id: id,
+        stub: stub,
+        source: url,
+        ms: endTime - startTime,
+        error: result
+      })
+    } else {
+      tmsLogger.object(`Uploaded image for object ${id} for ${stub}`, {
+        action: 'uploadedImage',
+        id: id,
+        stub: stub,
+        source: url,
+        ms: endTime - startTime
+      })
+      perfectFile.remote = {
+        status: 'ok',
+        public_id: result.public_id,
+        version: result.version,
+        signature: result.signature,
+        width: result.width,
+        height: result.height,
+        format: result.format
+      }
     }
     const perfectFileJSONPretty = JSON.stringify(perfectFile, null, 4)
     fs.writeFileSync(filename, perfectFileJSONPretty, 'utf-8')
@@ -68,15 +112,22 @@ const uploadImage = (stub, id) => {
 const checkImages = () => {
   const config = new Config()
   const cloudinaryConfig = config.get('cloudinary')
+  const tmsLogger = logging.getTMSLogger()
 
   //  If there's no cloudinary configured then we don't bother
   //  to do anything
   if (cloudinaryConfig === null) {
+    tmsLogger.object(`No cloudinary configured`, {
+      action: 'checkingImages'
+    })
     return
   }
 
   //  Only carry on if we have a data and tms directory
   if (!fs.existsSync(rootDir) || !fs.existsSync(path.join(rootDir, 'tms'))) {
+    tmsLogger.object(`No data or data/tms found`, {
+      action: 'checkingImages'
+    })
     return
   }
 
@@ -85,6 +136,9 @@ const checkImages = () => {
   //  yet.
   let foundImageToUpload = false
   const tmsses = fs.readdirSync(path.join(rootDir, 'tms'))
+  tmsLogger.object(`Checking for a new image to upload`, {
+    action: 'checkingImages'
+  })
   tmsses.forEach((tms) => {
     if (foundImageToUpload === true) return
     //  Check to see if a 'perfect' directory exists
@@ -112,6 +166,11 @@ const checkImages = () => {
       })
     }
   })
+  if (foundImageToUpload === false) {
+    tmsLogger.object(`No new images found to upload`, {
+      action: 'checkingImages'
+    })
+  }
 }
 
 exports.startUploading = () => {
