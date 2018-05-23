@@ -62,6 +62,10 @@ const argOptionDefinitions = [{
   alias: 's',
   type: Boolean,
   defaultOption: false
+},
+{
+  name: 'skipOpen',
+  type: Boolean
 }
 ]
 const commandLineArgs = require('command-line-args')
@@ -377,13 +381,18 @@ if (fs.existsSync(pidFile)) {
 
 fs.writeFileSync(pidFile, process.pid, 'utf-8')
 
+let skipOpen = false
+if ('skipOpen' in argOptions && argOptions.skipOpen === true) {
+  skipOpen = true
+}
+
 //  If we are on the dev server and we aren't restarting with a
 //  build skip, then start up a browser to get the user going.
 //  If we don't have any Auth0 stuff in place yet we also need
 //  to pass over the handshake value so we can do a quick
 //  basic authentication.
 if (process.env.NODE_ENV === 'development') {
-  if (skipBuild === false) {
+  if (skipBuild === false && skipOpen === false) {
     const opn = require('opn')
     // If there is no auth0 entry in the config file then we need
     // to pass over the handshake value
@@ -420,8 +429,15 @@ if (process.env.NODE_ENV === 'development') {
 
 http.createServer(app).listen(process.env.PORT)
 
+//  Now we kick off the regular tasks that do things periodically
+//  kinda like cron jobs
 const pingtools = require('./app/modules/pingtools')
 pingtools.startPinging()
 
+//  This starts off checking the TMS systems for objects
 const tms = require('./app/modules/tms')
 tms.startFetching()
+
+//  This starts off checking for images to upload to cloudinary
+const cloudinary = require('./app/modules/cloudinary')
+cloudinary.startUploading()
