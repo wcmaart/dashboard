@@ -47,8 +47,8 @@ const uploadImage = (stub, id) => {
   //  Swap the tumbnail version of the image url for the preview url
   const previewUrl = perfectFile.tmsSource.split('/')
   previewUrl.pop()
-  previewUrl.push('preview')
-  const url = `${tmsses[0]}${previewUrl.join('/')}`
+  const imageID = previewUrl.pop()
+  const url = `${tmsses[0]}/apis/iiif/image/v2/${imageID}/full/full/0/default.jpg`
   //  Set up cloudinary
   cloudinary.config(cloudinaryConfig)
 
@@ -88,6 +88,7 @@ const uploadImage = (stub, id) => {
       })
       perfectFile.remote = {
         status: 'ok',
+        original_image_id: imageID,
         public_id: result.public_id,
         version: result.version,
         signature: result.signature,
