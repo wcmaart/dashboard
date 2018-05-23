@@ -65,7 +65,7 @@ const saveImageSource = (stub, id, source) => {
     //  Shuffle the image sources into the old ones, just incase we want to
     //  use _something_ inbetween finding out we need to refetch the image
     //  and having actually fetched it
-    perfectFile.oldTMSSource = perfectFile.source
+    perfectFile.oldTMSSource = perfectFile.tmsSource
     perfectFile.tmsSource = source
     perfectFile.oldRemote = perfectFile.remote
     perfectFile.remote = null

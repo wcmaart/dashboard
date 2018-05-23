@@ -9,6 +9,7 @@ exports.index = (req, res) => {
   if ('action' in req.body) {
     const config = new Config()
 
+    //  ADD/UPDATE GRAPHQL
     if (req.body.action === 'updategraphql' && 'graphql' in req.body && req.body.graphql !== '') {
       config.set('graphql', {
         host: req.body.graphql
@@ -18,6 +19,7 @@ exports.index = (req, res) => {
       return res.redirect('/config')
     }
 
+    //  ADD/UPDATE TMS
     if (req.body.action === 'updatetms' && 'tmsstub' in req.body && req.body.tmsstub !== '' && 'tmsurl' in req.body && req.body.tmsurl !== '' && 'key' in req.body && req.body.key !== '') {
       //  If there's no TMS entry in config, then we create it
       if (config.get('tms') === null) {
@@ -45,6 +47,7 @@ exports.index = (req, res) => {
       return res.redirect('/config')
     }
 
+    //  DELETE TMS
     if (req.body.action === 'deletetms' && 'tmsstub' in req.body && req.body.tmsstub !== '') {
       const tms = config.get('tms')
       if (tms !== null) {
@@ -54,6 +57,18 @@ exports.index = (req, res) => {
         config.set('tms', newtms)
         return res.redirect('/config')
       }
+    }
+
+    //  ADD/UPDATE CLOUDINARY
+    if (req.body.action === 'updatecloudinary' && 'cloud_name' in req.body && req.body.cloud_name !== '' && 'api_key' in req.body && req.body.api_key !== '' && 'api_secret' in req.body && req.body.api_secret !== '') {
+      //  If there's no TMS entry in config, then we create it
+
+      config.set('cloudinary', {
+        cloud_name: req.body.cloud_name,
+        api_key: req.body.api_key,
+        api_secret: req.body.api_secret
+      })
+      return res.redirect('/config')
     }
   }
 
