@@ -157,6 +157,42 @@
 
         </form>
       </p>
+
+      <hr />
+
+      <h2>Cloudinary</h2>
+      <p>
+        We are currently using
+        <a href="https://cloudinary.com">Cloudinary</a> to host images (they are ultimately stored on S3), you will need to set up a free cloudinary account
+        and add your credentials here.
+        <form method="post">
+          <table>
+            <tr>
+              <td>Cloud name</td>
+              <td>
+                <input type="text" name="cloud_name" placeholder="Example: mytmsimagehost" {{#if config.cloudinary.cloud_name}}value="{{config.cloudinary.cloud_name}}"
+                  {{/if}}>
+            </tr>
+            <tr>
+              <td>API key</td>
+              <td>
+                <input type="text" name="api_key" placeholder="Example: 5551234567890" {{#if config.cloudinary.api_key}}value="{{config.cloudinary.api_key}}"
+                  {{/if}}>
+            </tr>
+            <tr>
+              <td>API secret</td>
+              <td>
+                <input type="text" name="api_secret" placeholder="Example: abCD12-3Fg4Hixyz" {{#if config.cloudinary.api_secret}}value="{{config.cloudinary.api_secret}}"
+                  {{/if}}>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <button type="submit" value="updatecloudinary" name="action">Update</button>
+              </td>
+            </tr>
+          </table>
+        </form>
+      </p>
     </div>
   </div>
 
