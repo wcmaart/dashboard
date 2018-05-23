@@ -97,6 +97,22 @@ body {
             background-color: #039be5;
           }
         }
+        ul {
+          &.tmsSelect {
+            list-style: none;
+            padding-top: 1.5rem;
+            li {
+              font-size: 2rem;
+              line-height: 2rem;
+              input {
+                margin-right: 1rem;
+                vertical-align: middle;
+                width: 2rem;
+                height: 2rem;
+              }
+            }
+          }
+        }
       }
     }
     &.documentation {
