@@ -275,7 +275,8 @@ body {
     border-bottom: 1px solid #CDDAD0;
     font-size: 0.8em;
     margin-bottom: 1rem;
-    .graphQL {
+    .graphQL,
+    .elasticsearch {
       float: right;
       margin-right: 2em;
       cursor: pointer;

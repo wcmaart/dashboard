@@ -19,6 +19,16 @@ exports.index = (req, res) => {
       return res.redirect('/config')
     }
 
+    //  ADD/UPDATE ELASTIC SEARCH
+    if (req.body.action === 'updateelasticsearch' && 'elasticsearch' in req.body && req.body.elasticsearch !== '') {
+      config.set('elasticsearch', {
+        host: req.body.elasticsearch
+      })
+      const pingtools = require('../../modules/pingtools')
+      pingtools.pingES()
+      return res.redirect('/config')
+    }
+
     //  ADD/UPDATE TMS
     if (req.body.action === 'updatetms' && 'tmsstub' in req.body && req.body.tmsstub !== '' && 'tmsurl' in req.body && req.body.tmsurl !== '' && 'key' in req.body && req.body.key !== '') {
       //  If there's no TMS entry in config, then we create it

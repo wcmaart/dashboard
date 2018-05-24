@@ -35,7 +35,9 @@
 
       <hr />
 
-      <h2>GraphQL</h2>
+      <h2>
+        <a name="graphql">GraphQL</a>
+      </h2>
       {{#if config.graphql}}
       <p>
         Congratulations graphQL has been set up, visit it here:
@@ -43,7 +45,7 @@
         <a href="/developer/graphql/status">status here</a>.
       </p>
       <p>
-        You can reconfigure it below is needed.
+        You can reconfigure it below if needed.
       </p>
       {{else}}
       <p>
@@ -77,6 +79,39 @@
             <tr>
               <td colspan="2">
                 <button type="submit" value="updategraphql" name="action">Update</button>
+              </td>
+            </tr>
+          </table>
+
+        </form>
+      </p>
+
+      <hr />
+
+      <h2>
+        <a name="elasticsearch">Elastic Search</a>
+      </h2>
+      {{#if config.elasticsearch}}
+      <p>
+        Congratulations ElasticSearch has been set up
+      </p>
+      <p>
+        You can reconfigure it below if needed.
+      </p>
+      {{/if}}
+      <p>
+        <form method="post">
+          <table>
+            <tr>
+              <td>Elastic Search</td>
+              <td>
+                <input type="text" name="elasticsearch" placeholder="{{#ifEqual NODE_ENV 'development'}}http://localhost:9200{{else}}https://domain.com{{/ifEqual}}"
+                  {{#if config.elasticsearch.host}}value="{{config.elasticsearch.host}}" {{/if}}>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <button type="submit" value="updateelasticsearch" name="action">Update</button>
               </td>
             </tr>
           </table>
