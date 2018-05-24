@@ -31,16 +31,21 @@ const saveImageSource = (stub, id, source) => {
   let perfectFile = {}
   let perfectFileJSONPretty = ''
 
+  //  Trim the source path to get rid of the jsession stuff
+  let newSource = source.split('/')
+  newSource.pop()
+  newSource = newSource.join('/')
+
   //  Now see if a file already exists, if not, then we add it
   if (!fs.existsSync(filename)) {
     tmsLogger.object(`Creating perfect file for object ${id} for ${stub}`, {
       action: 'new',
       id: id,
       stub: stub,
-      source: source
+      source: newSource
     })
     perfectFile = {
-      tmsSource: source,
+      tmsSource: newSource,
       oldTMSSource: null,
       remote: null,
       oldRemote: null
@@ -55,18 +60,18 @@ const saveImageSource = (stub, id, source) => {
 
   //  Now we check to see if the tmsSource is different to the currently stored
   //  source, if so then we need to set the remote to null so we go and process it again
-  if (perfectFile.tmsSource !== source) {
+  if (perfectFile.tmsSource !== newSource) {
     tmsLogger.object(`New TMS source image found for ${id} for ${stub}`, {
       action: 'update',
       id: id,
       stub: stub,
-      tmsSource: source
+      tmsSource: newSource
     })
     //  Shuffle the image sources into the old ones, just incase we want to
     //  use _something_ inbetween finding out we need to refetch the image
     //  and having actually fetched it
     perfectFile.oldTMSSource = perfectFile.tmsSource
-    perfectFile.tmsSource = source
+    perfectFile.tmsSource = newSource
     perfectFile.oldRemote = perfectFile.remote
     perfectFile.remote = null
     perfectFileJSONPretty = JSON.stringify(perfectFile, null, 4)
