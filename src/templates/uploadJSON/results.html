@@ -1,0 +1,72 @@
+<html>
+
+<head>
+  <title>Dashboard - uploaded JSON</title>
+  {{> head}}
+</head>
+
+<body class="cover" style="background-image: url(/images/cover_001.jpg);">
+
+  {{> nav}}
+
+  <div class="wrapper">
+    <div class="container admin-layout documentation">
+
+      <h1>Uploaded JSON</h1>
+
+      <h2>Object JSON</h2>
+      {{#if error}}
+      <p>
+        You have just tried to upload an objects file, it failed with the following error...
+      </p>
+      <p>
+        {{error.msg}}
+      </p>
+      {{else}}
+      <p>
+        You have just uploaded an objects file...
+      </p>
+
+      <p>
+        <table>
+          <tr>
+            <td style="width: 20%">Total objects</td>
+            <td>{{totalObjects}}</td>
+          </tr>
+          <tr>
+            <td>New objects</td>
+            <td>{{newObjects}}</td>
+          </tr>
+          <tr>
+            <td>Modified objects</td>
+            <td>{{modifiedObjects}}</td>
+          </tr>
+        </table>
+      </p>
+      {{#if fields}}
+      <p>
+        These are the fields contained in all the objects...
+      </p>
+      <p>
+        <table>
+          {{#each fields}}
+          <tr>
+            <td style="width: 20%">{{@key}}</td>
+            <td>{{#if @this}}New!{{else}}&nbsp;{{/if}}</td>
+          </tr>
+          {{/each}}
+        </table>
+      </p>
+      {{/if}}
+      <p>
+        You should be able to track the progress of new uploaded via the
+        <a href="/stats">Stats</a> page.
+      </p>
+      {{/if}}
+    </div>
+  </div>
+
+  {{> tail}}
+</body>
+
+</html>
