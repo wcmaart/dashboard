@@ -23,20 +23,24 @@
       <h4 style="margin-bottom: 1rem">{{stub}}</h4>
       <table>
         <tr>
-          <td style="width:20%">Total objects found so far</td>
-          <td>{{totalFiles}}</td>
+          <td style="width:40%">Total objects found so far</td>
+          <td>{{prettyNumber totalFiles}}</td>
         </tr>
         <tr>
           <td>Objects with images</td>
-          <td>{{haveImageSources}}</td>
+          <td>{{prettyNumber haveImageSources}}</td>
         </tr>
         <tr>
           <td>Images uploaded</td>
-          <td>{{imagesUploaded}}</td>
+          <td>{{prettyNumber imagesUploaded}}</td>
+        </tr>
+        <tr>
+          <td>Object files waiting to be processed</td>
+          <td>{{prettyNumber waitingToBeProcessed}}</td>
         </tr>
         <tr>
           <td>Results generated in</td>
-          <td>{{ms}}ms</td>
+          <td>{{prettyNumber ms}}ms</td>
         </tr>
       </table>
       {{/each}} {{/if}}
