@@ -108,6 +108,11 @@ exports.timeAgo = backThen => {
   return moment(backThen).fromNow()
 }
 
+exports.prettyNumber = x => {
+  if (x === null || x === undefined) return ''
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
 exports.dumpThis = object => {
   console.log(object)
   return ''

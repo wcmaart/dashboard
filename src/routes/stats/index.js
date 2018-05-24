@@ -48,11 +48,28 @@ exports.index = (req, res) => {
           })
         })
       }
-      const endTime = new Date().getTime()
-      thisTMS.ms = endTime - startTime
       thisTMS.totalFiles = totalFiles
       thisTMS.haveImageSources = haveImageSources
       thisTMS.imagesUploaded = imagesUploaded
+
+      let waitingToBeProcessed = 0
+      const processDir = path.join(rootDir, 'tms', tms.stub, 'process')
+      if (fs.existsSync(processDir)) {
+        const subFolders = fs.readdirSync(perfectDir)
+        subFolders.forEach((subFolder) => {
+          const jsonFiles = fs.readdirSync(path.join(processDir, subFolder)).filter((file) => {
+            const filesSplit = file.split('.')
+            if (filesSplit.length !== 2) return false
+            if (filesSplit[1] !== 'json') return false
+            return true
+          })
+          waitingToBeProcessed += jsonFiles.length
+        })
+      }
+      thisTMS.waitingToBeProcessed = waitingToBeProcessed
+
+      const endTime = new Date().getTime()
+      thisTMS.ms = endTime - startTime
       newTMS.push(thisTMS)
     })
   }
