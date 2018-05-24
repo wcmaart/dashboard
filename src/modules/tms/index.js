@@ -32,9 +32,12 @@ const saveImageSource = (stub, id, source) => {
   let perfectFileJSONPretty = ''
 
   //  Trim the source path to get rid of the jsession stuff
-  let newSource = source.split('/')
-  newSource.pop()
-  newSource = newSource.join('/')
+  let newSource = null
+  if (source !== null) {
+    newSource = source.split('/')
+    newSource.pop()
+    newSource = newSource.join('/')
+  }
 
   //  Now see if a file already exists, if not, then we add it
   if (!fs.existsSync(filename)) {
@@ -76,6 +79,28 @@ const saveImageSource = (stub, id, source) => {
     perfectFile.remote = null
     perfectFileJSONPretty = JSON.stringify(perfectFile, null, 4)
     fs.writeFileSync(filename, perfectFileJSONPretty, 'utf-8')
+
+    //  We also need to move the file from the 'processed' folder into the process
+    //  folder if it exists, to make it trigger a new upload
+    const sourceObjectJSON = path.join(rootDir, 'tms', stub, 'processed', subFolder, `${id}.json`)
+    if (fs.existsSync(sourceObjectJSON)) {
+      tmsLogger.object(`Remove ${id} for ${stub} from processed folder and putting into process`, {
+        action: 'modified',
+        id: id,
+        stub: stub
+      })
+      //  Make sure the directory we are trying to copy into exists
+      //  (in theory of course it should, but you know!)
+      if (!fs.existsSync(path.join(rootDir, 'tms', stub, 'process'))) {
+        fs.mkdirSync(path.join(rootDir, 'tms', stub, 'process'))
+      }
+      if (!fs.existsSync(path.join(rootDir, 'tms', stub, 'process', subFolder))) {
+        fs.mkdirSync(path.join(rootDir, 'tms', stub, 'process', subFolder))
+      }
+      const targetObjectJSON = path.join(rootDir, 'tms', stub, 'process', subFolder, `${id}.json`)
+      //  Move the file over
+      fs.renameSync(sourceObjectJSON, targetObjectJSON)
+    }
   }
 }
 
@@ -173,6 +198,7 @@ const fetchPage = () => {
           page: tms.page,
           stub: tms.stub,
           error: error,
+          url: url,
           ms: (endTime - startTime)
         })
         tms.nextFetch = new Date().getTime() + (1000 * 60 * 5)
