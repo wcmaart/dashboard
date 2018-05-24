@@ -34,7 +34,7 @@ const saveImageSource = (stub, id, source) => {
   //  Trim the source path to get rid of the jsession stuff
   let newSource = null
   if (source !== null) {
-    let newSource = source.split('/')
+    newSource = source.split('/')
     newSource.pop()
     newSource = newSource.join('/')
   }
