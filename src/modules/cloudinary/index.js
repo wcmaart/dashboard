@@ -46,7 +46,6 @@ const uploadImage = (stub, id) => {
 
   //  Swap the tumbnail version of the image url for the preview url
   const previewUrl = perfectFile.tmsSource.split('/')
-  previewUrl.pop()
   const imageID = previewUrl.pop()
   const url = `${tmsses[0]}/apis/iiif/image/v2/${imageID}/full/full/0/default.jpg`
   //  Set up cloudinary

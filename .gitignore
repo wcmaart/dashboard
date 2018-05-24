@@ -11,3 +11,4 @@ logs/tms
 
 config.json
 /package-lock.json
+/cleantmsSource.js
