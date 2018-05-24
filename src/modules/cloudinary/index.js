@@ -35,6 +35,9 @@ const uploadImage = (stub, id) => {
   const perfectFileRaw = fs.readFileSync(filename, 'utf-8')
   const perfectFile = JSON.parse(perfectFileRaw)
 
+  //  Make sure we don't have a null source
+  if (perfectFile.tmsSource === null) return
+
   //  Grab the url for this tms system based on the stub
   const tmsses = config.get('tms').filter((tms) => {
     if (stub === tms.stub) return true

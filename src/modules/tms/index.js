@@ -32,9 +32,12 @@ const saveImageSource = (stub, id, source) => {
   let perfectFileJSONPretty = ''
 
   //  Trim the source path to get rid of the jsession stuff
-  let newSource = source.split('/')
-  newSource.pop()
-  newSource = newSource.join('/')
+  let newSource = null
+  if (source !== null) {
+    let newSource = source.split('/')
+    newSource.pop()
+    newSource = newSource.join('/')
+  }
 
   //  Now see if a file already exists, if not, then we add it
   if (!fs.existsSync(filename)) {
@@ -173,6 +176,7 @@ const fetchPage = () => {
           page: tms.page,
           stub: tms.stub,
           error: error,
+          url: url,
           ms: (endTime - startTime)
         })
         tms.nextFetch = new Date().getTime() + (1000 * 60 * 5)
