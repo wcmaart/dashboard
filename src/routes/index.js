@@ -120,6 +120,8 @@ router.get('/wait', main.wait)
 
 router.get('/api', ensureLoggedIn, api.index)
 router.post('/api/checkToken', api.checkToken)
+router.get('/api/objects', api.getObjects)
+router.get('/api/object', api.getObject)
 
 // ############################################################################
 //
