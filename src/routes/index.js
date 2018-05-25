@@ -113,6 +113,7 @@ router.get('/developer/graphql/status', ensureLoggedIn, developer.status.graphql
 router.get('/developer/elasticsearch/status', ensureLoggedIn, developer.status.elasticsearch)
 router.get('/settings', ensureLoggedIn, user.settings)
 router.get('/stats', ensureLoggedIn, stats.index)
+router.get('/stats/logs', ensureLoggedIn, stats.logs)
 router.get('/uploadJSON', ensureLoggedIn, uploadJSON.index)
 router.post('/uploadJSON', ensureLoggedIn, uploadJSON.getfile)
 router.get('/wait', main.wait)
