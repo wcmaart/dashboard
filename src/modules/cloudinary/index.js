@@ -177,8 +177,20 @@ const checkImages = () => {
 }
 
 exports.startUploading = () => {
-  setInterval(() => {
+  //  Remove the old interval timer
+  clearInterval(global.cloudinaryTmr)
+
+  //  See if we have an interval timer setting in the
+  //  timers part of the config, if not use the default
+  //  of 20,000 (20 seconds)
+  const config = new Config()
+  const timers = config.get('timers')
+  let interval = 20000
+  if (timers !== null && 'cloudinary' in timers) {
+    interval = parseInt(timers.cloudinary, 10)
+  }
+  global.cloudinaryTmr = setInterval(() => {
     checkImages()
-  }, 1000 * 20)
+  }, interval)
   checkImages()
 }

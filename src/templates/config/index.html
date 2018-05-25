@@ -221,6 +221,12 @@
                   {{/if}}>
             </tr>
             <tr>
+              <td>Interval in ms</td>
+              <td>
+                <input type="text" name="interval" placeholder="20000" {{#if config.timers.cloudinary}}value="{{config.timers.cloudinary}}"
+                  {{/if}}>
+            </tr>
+            <tr>
               <td colspan="2">
                 <button type="submit" value="updatecloudinary" name="action">Update</button>
               </td>

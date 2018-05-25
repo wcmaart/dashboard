@@ -1,4 +1,5 @@
 const Config = require('../../classes/config')
+const cloudinary = require('../../modules/cloudinary')
 
 exports.index = (req, res) => {
   if (req.user.roles.isAdmin !== true) {
@@ -78,6 +79,24 @@ exports.index = (req, res) => {
         api_key: req.body.api_key,
         api_secret: req.body.api_secret
       })
+
+      //  If we've been passed an interval, then we need to set that
+      //  and restart the interval timer.
+      //  Otherwise set it the default value of 20,000ms
+      if ('interval' in req.body && req.body.interval !== '') {
+        try {
+          const newInterval = parseInt(req.body.interval, 10)
+          if (newInterval > 0) {
+            config.set('timers.cloudinary', parseInt(req.body.interval, 10))
+            cloudinary.startUploading()
+          }
+        } catch (err) {
+          console.error(err)
+        }
+      } else {
+        config.set('timers.cloudinary', 20000)
+        cloudinary.startUploading()
+      }
       return res.redirect('/config')
     }
   }
