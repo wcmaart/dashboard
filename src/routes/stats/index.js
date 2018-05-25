@@ -167,7 +167,11 @@ exports.logs = (req, res) => {
       return parseInt(record.data.ms, 10)
     })
     //  Get the average time to upload an image
-    req.templateValues.averageImageUploadms = Math.floor(imagesUploadms.reduce((p, c) => p + c, 0) / imagesUploadms.length)
+    if (imagesUploadms.length > 0) {
+      req.templateValues.averageImageUploadms = Math.floor(imagesUploadms.reduce((p, c) => p + c, 0) / imagesUploadms.length)
+    } else {
+      req.templateValues.averageImageUploadms = 0
+    }
     req.templateValues.last100ImagesUploaded = last100ImagesUploaded.reverse()
 
     //  Get the total ms spent uploading the images
@@ -175,7 +179,11 @@ exports.logs = (req, res) => {
       return parseInt(record.data.ms, 10)
     })
     //  Get the average time to upload an image
-    req.templateValues.averagePagesReceivedms = Math.floor(pagesReceivedms.reduce((p, c) => p + c, 0) / pagesReceivedms.length)
+    if (pagesReceivedms.length > 0) {
+      req.templateValues.averagePagesReceivedms = Math.floor(pagesReceivedms.reduce((p, c) => p + c, 0) / pagesReceivedms.length)
+    } else {
+      req.templateValues.averagePagesReceivedms = 0
+    }
     req.templateValues.last100PagesReceived = last100PagesReceived.reverse()
 
     //  Get the total ms spent uploading the images
@@ -183,7 +191,11 @@ exports.logs = (req, res) => {
       return parseInt(record.data.ms, 10)
     })
     //  Get the average time to upload an image
-    req.templateValues.averageItemsUpsertedms = Math.floor(itemsUpsertedms.reduce((p, c) => p + c, 0) / itemsUpsertedms.length)
+    if (itemsUpsertedms.length > 0) {
+      req.templateValues.averageItemsUpsertedms = Math.floor(itemsUpsertedms.reduce((p, c) => p + c, 0) / itemsUpsertedms.length)
+    } else {
+      req.templateValues.averageItemsUpsertedms = 0
+    }
     req.templateValues.last100ItemsUpserted = last100ItemsUpserted.reverse()
 
     return res.render('stats/logs', req.templateValues)
