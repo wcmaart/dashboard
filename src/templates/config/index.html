@@ -112,6 +112,25 @@
               </td>
             </tr>
             <tr>
+              <td style="width: 20%; vertical-align: top;">
+                <br />
+                <p>Interval in ms</p>
+              </td>
+              <td>
+                <br />
+                <p>
+                  <strong>Note:</strong> This sets the intervals in the cycle of checking for items that need sending to the database
+                  and sending them. When the system is running normally with a few regular updates this just be set to something
+                  low like 20000 (the default 20 seconds) or even 60000 (once a minute). When we are first importing a large
+                  number of items you should let it run for an hour and then check the
+                  <a href="/stats/logs#upserts">logs page</a> for the average upload speed, then set the interval to around 1000 ms longer than the average.
+                  You can see the estimated item upserting time on the
+                  <a href="/stats">stats page</a>.
+                </p>
+                <input type="text" name="interval" placeholder="20000" {{#if config.timers.elasticsearch}}value="{{config.timers.elasticsearch}}"
+                  {{/if}}>
+            </tr>
+            <tr>
               <td colspan="2">
                 <button type="submit" value="updateelasticsearch" name="action">Update</button>
               </td>
