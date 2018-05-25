@@ -39,6 +39,18 @@
           <td>{{prettyNumber imagesUploaded}}</td>
         </tr>
         <tr>
+          <td style="vertical-align: top">Images remaining</td>
+          <td>{{prettyNumber imagesRemaining}} (Finishes {{timeAgo finishAt}}, estimate) {{#if ../user.roles.isAdmin}}
+            <small>
+              <br /> *If you have a lot of files to upload, you can adjust this time in the
+              <a href="/config#cloudinary">Cloudinary section</a> of the config page.</small>
+            {{/if}}
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
           <td>Object files waiting to be processed</td>
           <td>{{prettyNumber waitingToBeProcessed}}</td>
         </tr>
