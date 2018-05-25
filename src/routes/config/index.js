@@ -27,6 +27,25 @@ exports.index = (req, res) => {
       })
       const pingtools = require('../../modules/pingtools')
       pingtools.pingES()
+
+      //  If we've been passed an interval, then we need to set that
+      //  and restart the interval timer.
+      //  Otherwise set it the default value of 20,000ms
+      if ('interval' in req.body && req.body.interval !== '') {
+        try {
+          const newInterval = parseInt(req.body.interval, 10)
+          if (newInterval > 0) {
+            config.set('timers.elasticsearch', parseInt(req.body.interval, 10))
+            // elasticsearch.startUploading()
+          }
+        } catch (err) {
+          console.error(err)
+        }
+      } else {
+        config.set('timers.elasticsearch', 20000)
+        // elasticsearch.startUploading()
+      }
+
       return res.redirect('/config')
     }
 
