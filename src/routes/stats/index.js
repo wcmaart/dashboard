@@ -49,10 +49,11 @@ exports.index = (req, res) => {
           })
         })
       }
+      const timers = config.get('timers')
+
       //  Work out how long it'll take to upload the rest of the images at the current speed
       const imagesRemaining = haveImageSources - imagesUploaded
       let timeToUploadImages = imagesRemaining * 20000 // (20,000 ms is the default time between uploading)
-      const timers = config.get('timers')
       if (timers !== null && 'cloudinary' in timers) {
         timeToUploadImages = imagesRemaining * parseInt(timers.cloudinary, 10)
       }
@@ -78,6 +79,11 @@ exports.index = (req, res) => {
         })
       }
       thisTMS.waitingToBeProcessed = waitingToBeProcessed
+      let timeToUpsertItems = waitingToBeProcessed * 20000 // (20,000 ms is the default time between uploading)
+      if (timers !== null && 'elasticsearch' in timers) {
+        timeToUpsertItems = waitingToBeProcessed * parseInt(timers.elasticsearch, 10)
+      }
+      thisTMS.timeToUpsertItems = new Date().getTime() + timeToUpsertItems
 
       const endTime = new Date().getTime()
       thisTMS.ms = endTime - startTime
@@ -110,6 +116,7 @@ exports.logs = (req, res) => {
   const last100Lines = []
   const last100ImagesUploaded = []
   const last100PagesReceived = []
+  const last100ItemsUpserted = []
 
   const lr = new LineByLineReader(path.join(rootDir, lastLog))
   lr.on('line', function (line) {
@@ -143,6 +150,14 @@ exports.logs = (req, res) => {
         last100PagesReceived.shift()
       }
     }
+
+    //  And the upserted items
+    if ('action' in data && data.action === 'upsertedItem') {
+      last100ItemsUpserted.push(logEntry)
+      if (last100ItemsUpserted.length > 100) {
+        last100ItemsUpserted.shift()
+      }
+    }
   })
   lr.on('end', function () {
     req.templateValues.last100Lines = last100Lines.reverse()
@@ -162,6 +177,14 @@ exports.logs = (req, res) => {
     //  Get the average time to upload an image
     req.templateValues.averagePagesReceivedms = Math.floor(pagesReceivedms.reduce((p, c) => p + c, 0) / pagesReceivedms.length)
     req.templateValues.last100PagesReceived = last100PagesReceived.reverse()
+
+    //  Get the total ms spent uploading the images
+    const itemsUpsertedms = last100ItemsUpserted.map((record) => {
+      return parseInt(record.data.ms, 10)
+    })
+    //  Get the average time to upload an image
+    req.templateValues.averageItemsUpsertedms = Math.floor(itemsUpsertedms.reduce((p, c) => p + c, 0) / itemsUpsertedms.length)
+    req.templateValues.last100ItemsUpserted = last100ItemsUpserted.reverse()
 
     return res.render('stats/logs', req.templateValues)
   })

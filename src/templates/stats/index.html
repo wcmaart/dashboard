@@ -52,7 +52,22 @@
         </tr>
         <tr>
           <td>Object files waiting to be processed</td>
-          <td>{{prettyNumber waitingToBeProcessed}}</td>
+          <td>{{prettyNumber waitingToBeProcessed}} {{#iflte waitingToBeProcessed imagesRemaining}} (Finished {{timeAgo ../finishAt}},
+            estimate)
+            <small>
+              <br /> *Note, the speed to upsert items is gated by the images being uploaded, an item will only be uploaded when
+              a corresponding image has been uploaded. Items that don't have an image at all will just be uploaded asap.
+            </small>
+            {{else}} (Finished {{timeAgo ../timeToUpsertItems}}, estimate) {{#if ../../user.roles.isAdmin}}
+            <small>
+              <br /> *If you have a lot of files to upload, you can adjust this time in the
+              <a href="/config#elasticsearch">ElasticSearch section</a> of the config page.
+            </small>
+            {{/if}} {{/iflte}}
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
           <td>Results generated in</td>
