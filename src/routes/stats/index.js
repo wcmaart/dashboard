@@ -49,9 +49,19 @@ exports.index = (req, res) => {
           })
         })
       }
+      //  Work out how long it'll take to upload the rest of the images at the current speed
+      const imagesRemaining = haveImageSources - imagesUploaded
+      let timeToUploadImages = imagesRemaining * 20000 // (20,000 ms is the default time between uploading)
+      const timers = config.get('timers')
+      if (timers !== null && 'cloudinary' in timers) {
+        timeToUploadImages = imagesRemaining * parseInt(timers.cloudinary, 10)
+      }
       thisTMS.totalFiles = totalFiles
       thisTMS.haveImageSources = haveImageSources
       thisTMS.imagesUploaded = imagesUploaded
+      thisTMS.imagesRemaining = imagesRemaining
+      thisTMS.timeToUploadImages = timeToUploadImages
+      thisTMS.finishAt = new Date().getTime() + timeToUploadImages
 
       let waitingToBeProcessed = 0
       const processDir = path.join(rootDir, 'tms', tms.stub, 'process')

@@ -15,7 +15,9 @@
 
       <h1>Config</h1>
 
-      <h2>Handshake</h2>
+      <h2>
+        <a name="handshake">Handshake</a>
+      </h2>
       <p>
         If your app needs to communicate with the Dashboard you should store the handshake value in your own
         <code>.env</code>,
@@ -121,7 +123,8 @@
 
       <hr />
 
-      <h2>TMS</h2>
+      <h2>
+        <a name="tms"></a>TMS</h2>
       {{#if config.tms}}
       <p>
         These are your current TMS setups.
@@ -195,7 +198,9 @@
 
       <hr />
 
-      <h2>Cloudinary</h2>
+      <h2>
+        <a name="cloudinary">Cloudinary</a>
+      </h2>
       <p>
         We are currently using
         <a href="https://cloudinary.com">Cloudinary</a> to host images (they are ultimately stored on S3), you will need to set up a free cloudinary account
@@ -221,8 +226,21 @@
                   {{/if}}>
             </tr>
             <tr>
-              <td>Interval in ms</td>
+              <td style="width: 20%; vertical-align: top;">
+                <br />
+                <p>Interval in ms</p>
+              </td>
               <td>
+                <br />
+                <p>
+                  <strong>Note:</strong> This sets the intervals in the cycle of checking for images that need uploading and uploading
+                  them. When the system is running normally with a few regular updates this just be set to something low
+                  like 20000 (the default 20 seconds) or even 60000 (once a minute). When we are first importing a large
+                  number of items you should let it run for an hour and then check the
+                  <a href="/stats/logs#images">logs page</a> for the average upload speed, then set the interval to around 1000 ms longer than the average.
+                  You can see the estimated image uploading time on the
+                  <a href="/stats">stats page</a>.
+                </p>
                 <input type="text" name="interval" placeholder="20000" {{#if config.timers.cloudinary}}value="{{config.timers.cloudinary}}"
                   {{/if}}>
             </tr>
