@@ -4,6 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const rootDir = path.join(__dirname, '../../../data')
 const logging = require('../logging')
+const elasticsearch = require('elasticsearch')
 
 /**
  * This method tries to grab a record of an object that has an image that needs
@@ -13,8 +14,8 @@ const logging = require('../logging')
  * @param {String} stub The name of the TMS folder we are going to look in
  * @param {String} id The id of the object we want to upsert
  */
-const upsertObject = (stub, id) => {
-  // const tmsLogger = logging.getTMSLogger()
+const upsertObject = async (stub, id) => {
+  const tmsLogger = logging.getTMSLogger()
 
   //  Check to see that we have elasticsearch configured
   const config = new Config()
@@ -29,13 +30,66 @@ const upsertObject = (stub, id) => {
   const subFolder = String(Math.floor(id / 1000) * 1000)
   const processFilename = path.join(rootDir, 'tms', stub, 'process', subFolder, `${id}.json`)
   if (!fs.existsSync(processFilename)) return
+  //  And the matching perfect file
+  const perfectFilename = path.join(rootDir, 'tms', stub, 'perfect', subFolder, `${id}.json`)
+  if (!fs.existsSync(perfectFilename)) return
 
-  //  Read in the perfectFile
+  //  Read in the processFile
   const processFileRaw = fs.readFileSync(processFilename, 'utf-8')
   const processFile = JSON.parse(processFileRaw)
 
-  console.log('This is the file we are going to process')
-  console.log(processFile)
+  //  Read in the perfectFile
+  const perfectFileRaw = fs.readFileSync(perfectFilename, 'utf-8')
+  const perfectFile = JSON.parse(perfectFileRaw)
+
+  const upsertItem = processFile
+  upsertItem.tmsSource = perfectFile.tmsSource
+  upsertItem.remote = perfectFile.remote
+  upsertItem.source = stub
+
+  const esclient = new elasticsearch.Client(elasticsearchConfig)
+  const startTime = new Date().getTime()
+
+  //  Create the index if we need to
+  const index = 'objects_wcma'
+  const type = 'object'
+  const exists = await esclient.indices.exists({
+    index
+  })
+  if (exists === false) {
+    await esclient.indices.create({
+      index
+    })
+  }
+
+  //  Upsert the item
+  esclient.update({
+    index,
+    type,
+    id,
+    body: {
+      doc: upsertItem,
+      doc_as_upsert: true
+    }
+  }).then(() => {
+    //  Move it from the process to the processed folder
+    const processedDir = path.join(rootDir, 'tms', stub, 'processed')
+    if (!fs.existsSync(processedDir)) {
+      fs.mkdirSync(processedDir)
+    }
+    if (!fs.existsSync(path.join(processedDir, subFolder))) {
+      fs.mkdirSync(path.join(processedDir, subFolder))
+    }
+    const processedFilename = path.join(processedDir, subFolder, `${id}.json`)
+    fs.renameSync(processFilename, processedFilename)
+    const endTime = new Date().getTime()
+    tmsLogger.object(`Upserted item for object ${id} for ${stub}`, {
+      action: 'upsertedItem',
+      id: id,
+      stub: stub,
+      ms: endTime - startTime
+    })
+  })
 }
 
 /**
@@ -71,15 +125,14 @@ const checkItems = () => {
   //  yet.
   let foundItemToUpload = false
   const tmsses = fs.readdirSync(path.join(rootDir, 'tms'))
-  /*
-  tmsLogger.object(`Checking for a new items to upload`, {
+  tmsLogger.object(`Checking for a new items to upsert`, {
     action: 'checkingProcess'
   })
-  */
   tmsses.forEach((tms) => {
     if (foundItemToUpload === true) return
     //  Check to see if a 'process' directory exists
     const tmsDir = path.join(rootDir, 'tms', tms, 'process')
+    const tmsPerfectDir = path.join(rootDir, 'tms', tms, 'perfect')
     if (fs.existsSync(tmsDir)) {
       if (foundItemToUpload === true) return
       const subFolders = fs.readdirSync(tmsDir)
@@ -93,22 +146,21 @@ const checkItems = () => {
         })
         files.forEach((file) => {
           if (foundItemToUpload === true) return
-          // const processFileRaw = fs.readFileSync(path.join(tmsDir, subFolder, file), 'utf-8')
-          // const processFile = JSON.parse(processFileRaw)
-          /*
-          if (perfectFile.tmsSource !== null && perfectFile.remote === null) {
-            foundImageToUpload = true
+          //  Read in the perfect version of the file, because we want to see if the remote
+          //  data has been set yet, or if it and the source is null, in either case we can upsert the
+          //  file. Otherwise we are going to skip it.
+          const perfectFileRaw = fs.readFileSync(path.join(tmsPerfectDir, subFolder, file), 'utf-8')
+          const perfectFile = JSON.parse(perfectFileRaw)
+          if ((perfectFile.tmsSource !== null && perfectFile.remote !== null) || (perfectFile.tmsSource === null && perfectFile.remote === null)) {
+            foundItemToUpload = true
             upsertObject(tms, file.split('.')[0])
           }
-          */
-          foundItemToUpload = true
-          upsertObject(tms, file.split('.')[0])
         })
       })
     }
   })
   if (foundItemToUpload === false) {
-    tmsLogger.object(`No new items found to upload`, {
+    tmsLogger.object(`No new items found to upsert`, {
       action: 'checkingProcess'
     })
   }
