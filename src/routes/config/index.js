@@ -1,5 +1,6 @@
 const Config = require('../../classes/config')
 const cloudinary = require('../../modules/cloudinary')
+const elasticsearch = require('../../modules/elasticsearch')
 
 exports.index = (req, res) => {
   if (req.user.roles.isAdmin !== true) {
@@ -36,14 +37,14 @@ exports.index = (req, res) => {
           const newInterval = parseInt(req.body.interval, 10)
           if (newInterval > 0) {
             config.set('timers.elasticsearch', parseInt(req.body.interval, 10))
-            // elasticsearch.startUploading()
+            elasticsearch.startUpserting()
           }
         } catch (err) {
           console.error(err)
         }
       } else {
         config.set('timers.elasticsearch', 20000)
-        // elasticsearch.startUploading()
+        elasticsearch.startUpserting()
       }
 
       return res.redirect('/config')
