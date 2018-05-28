@@ -1,6 +1,7 @@
 const request = require('request-promise')
 const Config = require('../../classes/config')
 const logging = require('../logging')
+const elasticsearch = require('elasticsearch')
 
 const fs = require('fs')
 const path = require('path')
@@ -214,9 +215,181 @@ const fetchPage = () => {
   })
 }
 
+const getUniques = async () => {
+  const tmsDir = path.join(rootDir, 'tms')
+  if (!fs.existsSync(tmsDir)) return
+
+  //  Check to see that we have elasticsearch configured
+  const config = new Config()
+  const elasticsearchConfig = config.get('elasticsearch')
+  //  If there's no elasticsearch configured then we don't bother
+  //  to do anything
+  if (elasticsearchConfig === null) {
+    return
+  }
+
+  const tmsLogger = logging.getTMSLogger()
+
+  const objectTypes = {}
+  const objectMakers = {}
+  const objectPeriods = {}
+  const objectMaterials = {}
+
+  const startTime = new Date().getTime()
+  tmsLogger.object(`Checking distinct records`, {
+    action: 'checkingDistinct'
+  })
+
+  //  This is going to loop through all the process and processed
+  //  folders in each tms system we have on. Opening all the files
+  //  and aggregating the data. We are doing this as we may as well
+  //  take the hit here, rather than asking the DB all the time for
+  //  the values. At least until I find a better way of doing this
+  const tmsses = fs.readdirSync(tmsDir)
+  tmsses.forEach((tms) => {
+    const processDir = path.join(tmsDir, tms, 'process')
+    const processedDir = path.join(tmsDir, tms, 'processed')
+    const checkDirs = []
+    if (fs.existsSync(processDir)) checkDirs.push(processDir)
+    if (fs.existsSync(processedDir)) checkDirs.push(processedDir)
+    checkDirs.forEach((pDir) => {
+      const subFolders = fs.readdirSync(pDir)
+      subFolders.forEach((subFolder) => {
+        const files = fs.readdirSync(path.join(pDir, subFolder)).filter(file => {
+          const fileFragments = file.split('.')
+          if (fileFragments.length !== 2) return false
+          if (fileFragments[1] !== 'json') return false
+          return true
+        })
+        //  Finally we are down to the files, now go through them
+        //  plucking out the values we want to keep
+        files.forEach((file) => {
+          const objectRaw = fs.readFileSync(path.join(pDir, subFolder, file), 'utf-8')
+          const object = JSON.parse(objectRaw)
+
+          //  Object Types
+          if ('object_name' in object && object.object_name !== null && object.object_name !== '') {
+            if (!(object.object_name in objectTypes)) {
+              objectTypes[object.object_name] = 0
+            }
+            objectTypes[object.object_name] += 1
+          }
+
+          //  Makers
+          if ('maker' in object && object.maker !== null && object.maker !== '') {
+            if (!(object.maker in objectMakers)) {
+              objectMakers[object.maker] = 0
+            }
+            objectMakers[object.maker] += 1
+          }
+
+          //  Periods
+          if ('period' in object && object.period !== null && object.period !== '') {
+            if (!(object.period in objectPeriods)) {
+              objectPeriods[object.period] = 0
+            }
+            objectPeriods[object.period] += 1
+          }
+
+          //  Materials
+          if ('medium' in object && object.medium !== null && object.medium !== '') {
+            if (!(object.medium in objectMaterials)) {
+              objectMaterials[object.medium] = 0
+            }
+            objectMaterials[object.medium] += 1
+          }
+        })
+      })
+    })
+  })
+
+  tmsLogger.object(`Checked distinct records`, {
+    action: 'checkedDistinct',
+    ms: new Date().getTime() - startTime
+  })
+
+  const bulking = [{
+    index: 'object_types_wcma',
+    type: 'object_type',
+    source: objectTypes,
+    counter: 0
+  },
+  {
+    index: 'object_makers_wcma',
+    type: 'object_makers',
+    source: objectMakers,
+    counter: 0
+  },
+  {
+    index: 'object_periods_wcma',
+    type: 'object_period',
+    source: objectPeriods,
+    counter: 0
+  },
+  {
+    index: 'object_materials_wcma',
+    type: 'object_materials',
+    source: objectMaterials,
+    counter: 0
+  }
+  ]
+
+  const esclient = new elasticsearch.Client(elasticsearchConfig)
+
+  bulking.forEach(async (bulkThis) => {
+    const bulkThisArray = []
+    const index = bulkThis.index
+    const type = bulkThis.type
+
+    Object.entries(bulkThis.source).forEach((keyVal) => {
+      const objectType = keyVal[0]
+      const count = keyVal[1]
+      bulkThisArray.push({
+        index: {
+          _id: bulkThis.counter
+        }
+      })
+      bulkThisArray.push({
+        id: bulkThis.counter,
+        title: objectType,
+        count: count
+      })
+      bulkThis.counter += 1
+    })
+
+    //  Now that we have our data, we need to store it into the database
+    const exists = await esclient.indices.exists({
+      index
+    })
+    if (exists !== true) {
+      await esclient.indices.create({
+        index
+      })
+    }
+    esclient.bulk({
+      index,
+      type,
+      body: bulkThisArray
+    }).then(() => {
+      tmsLogger.object(`Bulk uploaded ${index}`, {
+        action: 'bulkUploaded',
+        index,
+        ms: new Date().getTime() - startTime
+      })
+    })
+  })
+}
+
 exports.startFetching = () => {
   setInterval(() => {
     fetchPage()
   }, 1000 * 60)
   fetchPage()
+}
+
+exports.getUniques = () => {
+  setInterval(() => {
+    getUniques()
+  }, 1000 * 60 * 60)
+  getUniques()
 }
