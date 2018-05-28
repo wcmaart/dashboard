@@ -438,6 +438,7 @@ pingtools.startPingingES()
 //  This starts off checking the TMS systems for objects
 const tms = require('./app/modules/tms')
 tms.startFetching()
+tms.getUniques()
 
 //  This starts off checking for images to upload to cloudinary
 const cloudinary = require('./app/modules/cloudinary')
