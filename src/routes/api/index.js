@@ -190,51 +190,112 @@ exports.checkToken = async (req, res) => {
   res.send(JSON.stringify(rtnJSON))
 }
 
+const noElasticSearch = (res) => {
+  const error = {
+    status: 'error',
+    msg: `ElasticSearch is not set up`
+  }
+  res.setHeader('Content-Type', 'application/json')
+  res.status(401)
+  return res.send(JSON.stringify(error))
+}
+
+const getPage = (query) => {
+  const defaultPage = 0
+  if ('page' in query) {
+    try {
+      const page = parseInt(query.page, 10)
+      if (page < 0) {
+        return defaultPage
+      }
+      return page
+    } catch (er) {
+      return defaultPage
+    }
+  }
+  return defaultPage
+}
+
+const getPerPage = (query) => {
+  const defaultPerPage = 50
+  if ('per_page' in query) {
+    try {
+      const perPage = parseInt(query.per_page, 10)
+      if (perPage < 0) {
+        return defaultPerPage
+      }
+      return perPage
+    } catch (er) {
+      return defaultPerPage
+    }
+  }
+  return defaultPerPage
+}
+
 exports.getObjects = async (req, res) => {
   const config = new Config()
 
   //  Grab the elastic search config details
   const elasticsearchConfig = config.get('elasticsearch')
   if (elasticsearchConfig === null) {
-    const error = {
-      status: 'error',
-      msg: `ElasticSearch is not set up`
-    }
-    res.setHeader('Content-Type', 'application/json')
-    res.status(401)
-    res.send(JSON.stringify(error))
-    return
+    return noElasticSearch(res)
   }
 
   //  Set up the client
   const esclient = new elasticsearch.Client(elasticsearchConfig)
   const index = 'objects_wcma'
-  let page = 0
-  let perPage = 50
-  if ('page' in req.query) {
-    try {
-      page = parseInt(req.query.page, 10)
-      if (page < 0) {
-        page = 0
+  const page = getPage(req.query)
+  const perPage = getPerPage(req.query)
+  const body = {
+    from: page * perPage,
+    size: perPage
+  }
+
+  //  Sigh, very bad way to add filters
+  //  NOTE: This doesn't combine filters
+  if ('type' in req.query && req.query.type !== '') {
+    body.query = {
+      match: {
+        object_name: {
+          query: req.query.type
+        }
       }
-    } catch (er) {
-      console.error(er)
     }
   }
-  if ('per_page' in req.query) {
-    try {
-      perPage = parseInt(req.query.per_page, 10)
-      if (perPage < 0) {
-        perPage = 0
+
+  if ('maker' in req.query && req.query.maker !== '') {
+    body.query = {
+      match: {
+        maker: {
+          query: req.query.maker
+        }
       }
-    } catch (er) {
-      console.error(er)
     }
   }
+
+  if ('period' in req.query && req.query.period !== '') {
+    body.query = {
+      match: {
+        period: {
+          query: req.query.period
+        }
+      }
+    }
+  }
+
+  if ('material' in req.query && req.query.material !== '') {
+    body.query = {
+      match: {
+        medium: {
+          query: req.query.material
+        }
+      }
+    }
+  }
+
   const records = await esclient.search({
     index,
-    from: page,
-    size: perPage
+    body
   }).catch((err) => {
     console.error(err)
   })
@@ -248,7 +309,7 @@ exports.getObjects = async (req, res) => {
   const rtnJSON = {
     status: 'ok',
     msg: `Hello world`,
-    objects
+    results: objects
   }
   res.setHeader('Content-Type', 'application/json')
   res.send(JSON.stringify(rtnJSON))
@@ -260,14 +321,7 @@ exports.getObject = async (req, res) => {
   //  Grab the elastic search config details
   const elasticsearchConfig = config.get('elasticsearch')
   if (elasticsearchConfig === null) {
-    const error = {
-      status: 'error',
-      msg: `ElasticSearch is not set up`
-    }
-    res.setHeader('Content-Type', 'application/json')
-    res.status(401)
-    res.send(JSON.stringify(error))
-    return
+    return noElasticSearch(res)
   }
 
   //  Set up the client
@@ -302,6 +356,103 @@ exports.getObject = async (req, res) => {
     status: 'ok',
     msg: `Hello world`,
     objects
+  }
+  res.setHeader('Content-Type', 'application/json')
+  res.send(JSON.stringify(rtnJSON))
+}
+
+const getUniques = async (index, type, query, res) => {
+  const config = new Config()
+
+  //  Grab the elastic search config details
+  const elasticsearchConfig = config.get('elasticsearch')
+  if (elasticsearchConfig === null) {
+    return noElasticSearch(res)
+  }
+
+  //  Set up the client
+  const esclient = new elasticsearch.Client(elasticsearchConfig)
+  const page = getPage(query)
+  const perPage = getPerPage(query)
+  const records = await esclient.search({
+    index,
+    type,
+    body: {
+      from: page * perPage,
+      size: perPage,
+      sort: [{
+        count: {
+          order: 'desc'
+        }
+      }]
+    }
+  }).catch((err) => {
+    console.error(err)
+  })
+  let results = []
+  if (records !== undefined && records !== null && 'hits' in records) {
+    results = records.hits.hits.map((object) => {
+      return object._source
+    })
+  }
+  return results
+}
+
+exports.getObjectTypes = async (req, res) => {
+  const results = await getUniques('object_types_wcma', 'object_type', req.query, res)
+  if (!(Array.isArray(results))) {
+    return results
+  }
+  const rtnJSON = {
+    status: 'ok',
+    index: `object_types_wcma`,
+    type: `object_type`,
+    results: results
+  }
+  res.setHeader('Content-Type', 'application/json')
+  res.send(JSON.stringify(rtnJSON))
+}
+
+exports.getMakers = async (req, res) => {
+  const results = await getUniques('object_makers_wcma', 'object_makers', req.query, res)
+  if (!(Array.isArray(results))) {
+    return results
+  }
+  const rtnJSON = {
+    status: 'ok',
+    index: `object_makers_wcma`,
+    type: `object_makers`,
+    results: results
+  }
+  res.setHeader('Content-Type', 'application/json')
+  res.send(JSON.stringify(rtnJSON))
+}
+
+exports.getPeriods = async (req, res) => {
+  const results = await getUniques('object_periods_wcma', 'object_period', req.query, res)
+  if (!(Array.isArray(results))) {
+    return results
+  }
+  const rtnJSON = {
+    status: 'ok',
+    index: `object_periods_wcma`,
+    type: `object_period`,
+    results: results
+  }
+  res.setHeader('Content-Type', 'application/json')
+  res.send(JSON.stringify(rtnJSON))
+}
+
+exports.getMaterials = async (req, res) => {
+  const results = await getUniques('object_materials_wcma', 'object_materials', req.query, res)
+  if (!(Array.isArray(results))) {
+    return results
+  }
+  const rtnJSON = {
+    status: 'ok',
+    index: `object_materials_wcma`,
+    type: `object_materials`,
+    results: results
   }
   res.setHeader('Content-Type', 'application/json')
   res.send(JSON.stringify(rtnJSON))

@@ -328,8 +328,8 @@ const getUniques = async () => {
   },
   {
     index: 'object_materials_wcma',
-    type: 'object_period',
-    source: objectPeriods,
+    type: 'object_materials',
+    source: objectMaterials,
     counter: 0
   }
   ]
@@ -351,7 +351,7 @@ const getUniques = async () => {
       })
       bulkThisArray.push({
         id: bulkThis.counter,
-        objectType: objectType,
+        title: objectType,
         count: count
       })
       bulkThis.counter += 1
