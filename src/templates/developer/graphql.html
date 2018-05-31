@@ -49,21 +49,31 @@
               </li>
               <li>
                 <a href="#objects">Objects</a>
+                <ul>
+                  <li>
+                    <a href="#filtering">Filtering/Searching Objects</a>
+                  </li>
+                </ul>
               </li>
               <li>
-                <a href="#medias">Medias</a>
+                <a href="#object">Object</a>
               </li>
               <li>
-                <a href="#people">People</a>
+                <a href="#object_names">object_names (Object Type)</a>
               </li>
               <li>
-                <a href="#events">Events</a>
+                <a href="#makers">makers</a>
               </li>
               <li>
-                <a href="#places">Places</a>
+                <a href="#periods">periods</a>
+              </li>
+              <li>
+                <a href="#mediums">mediums</a>
               </li>
             </ul>
           </li>
+          <li>
+            <a href="#imageURLs">Remote Image URLs</a>
         </ul>
       </p>
 
@@ -178,6 +188,8 @@
 
       <pre class="query">{{{graphQLQuery queries.type '(name: "Object")'}}}</pre>
 
+      <hr />
+
       <h3>
         <a name="objects">Objects</a>
       </h3>
@@ -190,8 +202,13 @@
 
       <p>
         Valid filters are:
-        <code class="red">ids</code>,
-        <code class="red">filter</code>,
+        <code class="red">page</code>,
+        <code class="red">per_page</code>,
+        <code class="red">object_name</code>,
+        <code class="red">maker</code>,
+        <code class="red">period</code>,
+        <code class="red">medium</code> &amp;
+        <code class="red">title</code>.
       </p>
 
       <p>
@@ -218,271 +235,328 @@
       </p>
 
       <p>
-        This will return any objects whose ids match any in the array passed in. Note how we are asking for slightly more information
-        this time.
+        Here we are asking for slightly more information, note how we can use the
+        <code>per_page</code> filter to limit the number of results.
       </p>
 
       <p class="runinexplore">
-        <a href='{{exploreQuery queries.objectsMedium "(ids: [30986,30987])" config.graphql.host}}'>Run in the playground</a>
+        <a href='{{exploreQuery queries.objectsMedium "(page: 10, per_page: 4)" config.graphql.host}}'>Run in the playground</a>
       </p>
-      <pre class="query">{{{graphQLQuery queries.objectsMedium '(ids: [30986,30987])'}}}</pre>
+      <pre class="query">{{{graphQLQuery queries.objectsMedium '(page: 10, per_page: 4)'}}}</pre>
 
       <p>
         cURL
       </p>
       <p>
-        <pre class="query terminal">{{{curlQuery queries.objectsMedium '(ids: [30986,30987])' config.graphql.host user.apitoken}}}</pre>
+        <pre class="query terminal">{{{curlQuery queries.objectsMedium '(page: 10, per_page: 4)' config.graphql.host user.apitoken}}}</pre>
       </p>
 
       <p>
         NodeJS.
       </p>
       <p>
-        <pre class="query node">{{{nodeQuery queries.objectsMedium '(ids: [30986,30987])' config.graphql.host user.apitoken}}}</pre>
-      </p>
-
-      <p>
-        This is the full query for an object, which will include data from _all sources_ for that object. Usually you should use
-        the smaller query above where we have normalised the data for you. But if you're a power user with the need for certain
-        data here's the way to get it.
-      </p>
-
-      <p class="runinexplore">
-        <a href='{{exploreQuery queries.objectsLarge "(ids: 30986)" config.graphql.host}}'>Run in the playground</a>
-      </p>
-      <pre class="query">{{{graphQLQuery queries.objectsLarge '(ids: 30986)'}}}</pre>
-
-      <p>
-        cURL
-      </p>
-      <p>
-        <pre class="query terminal">{{{curlQuery queries.objectsLarge '(ids: 30986)' config.graphql.host user.apitoken}}}</pre>
-      </p>
-
-      <p>
-        NodeJS.
-      </p>
-      <p>
-        <pre class="query node">{{{nodeQuery queries.objectsLarge '(ids: 30986)' config.graphql.host user.apitoken}}}</pre>
-      </p>
-
-
-
-      <hr />
-
-      <h3>
-        <a name="medias">Medias</a>
-      </h3>
-
-      <p>
-        This query returns all the media types found in the objects.
-      </p>
-
-      <p>
-        Valid filters are:
-        <code class="red">ids</code>, a single id, or an array.
-      </p>
-
-      <p>
-        Here is the simplest call to get all medias.
-      </p>
-
-      <p class="runinexplore">
-        <a href='{{exploreQuery queries.medias "" config.graphql.host}}'>Run in the playground</a>
-      </p>
-      <pre class="query">{{{graphQLQuery queries.medias ''}}}</pre>
-
-      <p>
-        cURL
-      </p>
-      <p>
-        <pre class="query terminal">{{{curlQuery queries.medias '' config.graphql.host user.apitoken}}}</pre>
-      </p>
-
-      <p>
-        NodeJS.
-      </p>
-      <p>
-        <pre class="query node">{{{nodeQuery queries.medias '' config.graphql.host user.apitoken}}}</pre>
-      </p>
-
-      <hr />
-
-
-      <h3>
-        <a name="people">People</a>
-      </h3>
-
-      <p>
-        This query returns all the people connected with objects.
-      </p>
-
-      <p>
-        Valid filters are:
-        <code class="red">ids</code>, a single id, or an array.
-      </p>
-
-      <p>
-        Here is the simplest call to get all people.
-      </p>
-
-      <p class="runinexplore">
-        <a href='{{exploreQuery queries.people "" config.graphql.host}}'>Run in the playground</a>
-      </p>
-      <pre class="query">{{{graphQLQuery queries.people ''}}}</pre>
-
-      <p>
-        cURL
-      </p>
-      <p>
-        <pre class="query terminal">{{{curlQuery queries.people '' config.graphql.host user.apitoken}}}</pre>
-      </p>
-
-      <p>
-        NodeJS.
-      </p>
-      <p>
-        <pre class="query node">{{{nodeQuery queries.people '' config.graphql.host user.apitoken}}}</pre>
-      </p>
-
-      <p>
-        Here's how you'd get a single user.
-      </p>
-
-      <p class="runinexplore">
-        <a href='{{exploreQuery queries.people "(ids: 1)" config.graphql.host}}'>Run in the playground</a>
-      </p>
-      <pre class="query">{{{graphQLQuery queries.people '(ids: 1)'}}}</pre>
-
-
-
-      <hr />
-
-      <h3>
-        <a name="events">Events</a>
-      </h3>
-
-      <p>
-        This query selects all of the events.
-      </p>
-
-      <p>
-        Valid filters are:
-        <code class="red">ids</code>, a single id, or an array.
-      </p>
-
-      <p>
-        Here is the simplest call to get all events ids
-      </p>
-
-      <p class="runinexplore">
-        <a href='{{exploreQuery queries.eventsMini "" config.graphql.host}}'>Run in the playground</a>
-      </p>
-      <pre class="query">{{{graphQLQuery queries.eventsMini ''}}}</pre>
-
-      <p>
-        cURL
-      </p>
-      <p>
-        <pre class="query terminal">{{{curlQuery queries.eventsMini '' config.graphql.host user.apitoken}}}</pre>
-      </p>
-
-      <p>
-        NodeJS.
-      </p>
-      <p>
-        <pre class="query node">{{{nodeQuery queries.eventsMini '' config.graphql.host user.apitoken}}}</pre>
-      </p>
-
-      <p>
-        This will return a specific event based on an id.
-      </p>
-
-      <p class="runinexplore">
-        <a href='{{exploreQuery queries.eventsMedium "(ids: 1)" config.graphql.host}}'>Run in the playground</a>
-      </p>
-      <pre class="query">{{{graphQLQuery queries.eventsMedium '(ids: 1)'}}}</pre>
-
-      <p>
-        cURL
-      </p>
-      <p>
-        <pre class="query terminal">{{{curlQuery queries.eventsMedium '(ids: 1)' config.graphql.host user.apitoken}}}</pre>
-      </p>
-
-      <p>
-        NodeJS.
-      </p>
-      <p>
-        <pre class="query node">{{{nodeQuery queries.eventsMedium '(ids: 1)' config.graphql.host user.apitoken}}}</pre>
-      </p>
-
-      <p>
-        You can get the object in an event by passing in a request for the objects, following the scheme for
-        <a href="#objects">objects</a> shown above. The example query below isn't asking for the
-        <code class="red">raw</code> data, but you could easily do so again by following the
-        <a href="#objects">objects</a> example shown above.
-      </p>
-
-      <p class="runinexplore">
-        <a href='{{exploreQuery queries.eventsLarge "(ids: 1)" config.graphql.host}}'>Run in the playground</a>
-      </p>
-      <pre class="query">{{{graphQLQuery queries.eventsLarge '(ids: 1)'}}}</pre>
-
-      <p>
-        cURL
-      </p>
-      <p>
-        <pre class="query terminal">{{{curlQuery queries.eventsLarge '(ids: 1)' config.graphql.host user.apitoken}}}</pre>
-      </p>
-
-      <p>
-        NodeJS.
-      </p>
-      <p>
-        <pre class="query node">{{{nodeQuery queries.eventsLarge '(ids: 1)' config.graphql.host user.apitoken}}}</pre>
+        <pre class="query node">{{{nodeQuery queries.objectsMedium '(page: 10, per_page: 4)' config.graphql.host user.apitoken}}}</pre>
       </p>
 
       <hr />
 
       <h3>
-        <a name="places">Places</a>
+        <a name="filtering">Filtering/Searching Objects</a>
       </h3>
 
       <p>
-        This query returns all place information.
+        When you want to "drill down" into the collection these are the useful filters:
+        <code class="red">object_name</code>,
+        <code class="red">maker</code>,
+        <code class="red">period</code>,
+        <code class="red">medium</code> &amp;
+        <code class="red">title</code>. The first four;
+        <a href="#object_names">object_name</a>,
+        <a href="#makers">maker</a>,
+        <a href="#periods">period</a> and
+        <a href="#mediums">medium</a> are based on queries found below. The last one
+        <code class="red">title</code> is more of general search on the title field of the object.
       </p>
 
       <p>
-        Valid filters are:
-        <code class="red">ids</code>, a single id, or an array.
-      </p>
-
-      <p>
-        Here is the simplest call to get all places.
+        For example you would use the following query to get objects from the
+        <strong>"Roman"</strong> period.
       </p>
 
       <p class="runinexplore">
-        <a href='{{exploreQuery queries.places "" config.graphql.host}}'>Run in the playground</a>
+        <a href='{{exploreQuery queries.objectsMedium "(period: \"Roman\")" config.graphql.host}}'>Run in the playground</a>
       </p>
-      <pre class="query">{{{graphQLQuery queries.places ''}}}</pre>
+      <pre class="query">{{{graphQLQuery queries.objectsMedium '(period: "Roman")'}}}</pre>
+
+      <p>
+        Filters are additive, if you wanted to drill down further into
+        <strong>Roman rings</strong>, you would do this...
+      </p>
+
+      <p class="runinexplore">
+        <a href='{{exploreQuery queries.objectsMedium "(period: \"Roman\", object_name: \"ring\")" config.graphql.host}}'>Run in the playground</a>
+      </p>
+      <pre class="query">{{{graphQLQuery queries.objectsMedium '(period: "Roman", object_name: "ring")'}}}</pre>
+
+      <p>
+        All of these filters are "loose" filters, search for
+        <strong>"Roman"</strong> will also get you objects from
+        <strong>"Roman Imperial Period"</strong> and
+        <strong>"Late Roman Imperial Period"</strong>. This should be kept in mind when using the filter queries below, as they return
+        <em>unique</em> results. In this case the
+        <a href="#periods">periods</a> query will tell you there's a
+        <code class="red">count</code> of around 15 records for the
+        <strong>"Roman"</strong> period. But a search of objects with the
+        <strong>"Roman"</strong> period filter will return all occurances of
+        <strong>"Roman"</strong>.
+      </p>
+
+      <p>
+        This is useful when searching on
+        <code class="red">title</code>, here we find all the objects with
+        <strong>"Cloud"</strong> in the title.
+      </p>
+      <p class="runinexplore">
+        <a href='{{exploreQuery queries.objectsMedium "(title: \"Cloud\")" config.graphql.host}}'>Run in the playground</a>
+      </p>
+      <pre class="query">{{{graphQLQuery queries.objectsMedium '(title: "Cloud")'}}}</pre>
+
+      <hr />
+
+      <h3>
+        <a name="object">Object</a>
+      </h3>
+
+      <p>
+        You can get a single object by passing in the
+        <code class="red">id</code> parameter. Here we are showing
+        <em>all</em> the fields possible.
+      </p>
+
+      <p class="runinexplore">
+        <a href='{{exploreQuery queries.objectLarge "(id: \"105\")" config.graphql.host}}'>Run in the playground</a>
+      </p>
+      <pre class="query">{{{graphQLQuery queries.objectLarge '(id: "105")'}}}</pre>
 
       <p>
         cURL
       </p>
       <p>
-        <pre class="query terminal">{{{curlQuery queries.places '' config.graphql.host user.apitoken}}}</pre>
+        <pre class="query terminal">{{{curlQuery queries.objectLarge '(id: "105")' config.graphql.host user.apitoken}}}</pre>
       </p>
 
       <p>
         NodeJS.
       </p>
       <p>
-        <pre class="query node">{{{nodeQuery queries.places '' config.graphql.host user.apitoken}}}</pre>
+        <pre class="query node">{{{nodeQuery queries.objectLarge '(id: "105")' config.graphql.host user.apitoken}}}</pre>
+      </p>
+
+
+      <hr />
+
+
+      <h3>
+        <a name="object_names">object_names (Object Type)</a>
+      </h3>
+
+      <p>
+        This query returns all the object_names. Best thought of as "Object Type" but we use the name "object_name" when filtering
+        <a href="#objects">objects</a>.
+      </p>
+
+      <p>
+        Valid filters are:
+        <code class="red">page</code>,
+        <code class="red">per_page</code>, for pagination, the size and number of each page.
+        <br />
+      </p>
+
+      <p>
+        Here is the simplest call to get all object names.
+      </p>
+
+      <p class="runinexplore">
+        <a href='{{exploreQuery queries.objectNames "" config.graphql.host}}'>Run in the playground</a>
+      </p>
+      <pre class="query">{{{graphQLQuery queries.objectNames ''}}}</pre>
+
+      <p>
+        cURL
+      </p>
+      <p>
+        <pre class="query terminal">{{{curlQuery queries.objectNames '' config.graphql.host user.apitoken}}}</pre>
+      </p>
+
+      <p>
+        NodeJS.
+      </p>
+      <p>
+        <pre class="query node">{{{nodeQuery queries.objectNames '' config.graphql.host user.apitoken}}}</pre>
+      </p>
+
+
+
+      <hr />
+
+
+      <h3>
+        <a name="makers">makers</a>
+      </h3>
+
+      <p>
+        This query returns all the makers (for use in the
+        <code class="red">maker</code> filter).
+      </p>
+
+      <p>
+        Valid filters are:
+        <code class="red">page</code>,
+        <code class="red">per_page</code>, for pagination, the size and number of each page
+        <br />
+      </p>
+
+      <p class="runinexplore">
+        <a href='{{exploreQuery queries.makers "" config.graphql.host}}'>Run in the playground</a>
+      </p>
+      <pre class="query">{{{graphQLQuery queries.makers ''}}}</pre>
+
+      <p>
+        cURL
+      </p>
+      <p>
+        <pre class="query terminal">{{{curlQuery queries.makers '' config.graphql.host user.apitoken}}}</pre>
+      </p>
+
+      <p>
+        NodeJS.
+      </p>
+      <p>
+        <pre class="query node">{{{nodeQuery queries.makers '' config.graphql.host user.apitoken}}}</pre>
+      </p>
+
+
+
+      <hr />
+
+
+      <h3>
+        <a name="periods">periods</a>
+      </h3>
+
+      <p>
+        This query returns all the periods (for use in the
+        <code class="red">period</code> filter).
+      </p>
+
+      <p>
+        Valid filters are:
+        <code class="red">page</code>,
+        <code class="red">per_page</code>, for pagination, the size and number of each page
+        <br />
+      </p>
+
+      <p class="runinexplore">
+        <a href='{{exploreQuery queries.periods "" config.graphql.host}}'>Run in the playground</a>
+      </p>
+      <pre class="query">{{{graphQLQuery queries.periods ''}}}</pre>
+
+      <p>
+        cURL
+      </p>
+      <p>
+        <pre class="query terminal">{{{curlQuery queries.periods '' config.graphql.host user.apitoken}}}</pre>
+      </p>
+
+      <p>
+        NodeJS.
+      </p>
+      <p>
+        <pre class="query node">{{{nodeQuery queries.periods '' config.graphql.host user.apitoken}}}</pre>
+      </p>
+
+
+
+      <hr />
+
+
+      <h3>
+        <a name="mediums">mediums</a>
+      </h3>
+
+      <p>
+        This query returns all the mediums (for use in the
+        <code class="red">medium</code> filter).
+      </p>
+
+      <p>
+        Valid filters are:
+        <code class="red">page</code>,
+        <code class="red">per_page</code>, for pagination, the size and number of each page
+        <br />
+      </p>
+
+      <p class="runinexplore">
+        <a href='{{exploreQuery queries.mediums "" config.graphql.host}}'>Run in the playground</a>
+      </p>
+      <pre class="query">{{{graphQLQuery queries.mediums ''}}}</pre>
+
+      <p>
+        cURL
+      </p>
+      <p>
+        <pre class="query terminal">{{{curlQuery queries.mediums '' config.graphql.host user.apitoken}}}</pre>
+      </p>
+
+      <p>
+        NodeJS.
+      </p>
+      <p>
+        <pre class="query node">{{{nodeQuery queries.mediums '' config.graphql.host user.apitoken}}}</pre>
       </p>
 
       <hr />
 
+
+      <h3>
+        <a name="imageURLs">Remote Image URLs</a>
+      </h3>
+
+      <p>
+        When you ask for objects with the
+        <code>remote</code> field in the results, you'll get back a snippet like this...
+      </p>
+      <pre class="query">"remote": {
+  "status": "ok",
+  "original_image_id": "24771",
+  "public_id": "a9rb6r44eriepulxkrfa",
+  "version": 1527224433,
+  "signature": "64e52bd804af22ee0227c7c159ee4016b844daf3",
+  "width": 600,
+  "height": 436,
+  "format": "jpg"
+}</pre>
+
+      <p>Image urls use the following format
+        <code>http://res.cloudinary.com/wcma/image/upload/v[version]/[public_id].[format]</code>
+      </p>
+
+      <p>
+        Therefor the above url would be
+        <a href="http://res.cloudinary.com/wcma/image/upload/v1527224433/a9rb6r44eriepulxkrfa.jpg">http://res.cloudinary.com/wcma/image/upload/v1527224433/a9rb6r44eriepulxkrfa.jpg</a>
+        <img src="http://res.cloudinary.com/wcma/image/upload/v1527224433/a9rb6r44eriepulxkrfa.jpg" />
+      </p>
+      <p>
+        Note, you can also do image manipulation with parameters passed in the URL, for example to make a 250px square version you
+        would use:
+        <a href="http://res.cloudinary.com/wcma/image/upload/w_250,h_250,c_fill/v1527224433/a9rb6r44eriepulxkrfa.jpg">http://res.cloudinary.com/wcma/image/upload/w_250,h_250,c_fill/v1527224433/a9rb6r44eriepulxkrfa.jpg</a>
+        <br />
+        <img src="http://res.cloudinary.com/wcma/image/upload/w_250,h_250,c_fill/v1527224433/a9rb6r44eriepulxkrfa.jpg" />
+      </p>
+      <p>
+        See
+        <a href="https://cloudinary.com/documentation/image_transformations#resizing_and_cropping_images">Cloudinary</a> for more information.
+      </p>
     </div>
   </div>
 
