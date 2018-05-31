@@ -52,9 +52,7 @@ class Queries {
 }`
 
     this.hello = `query {
-  hello[[]] {
-    there
-  }
+  hello[[]]
 }`
 
     this.objectsMini = `query {
@@ -67,155 +65,105 @@ class Queries {
   objects[[]] {
     id
     title
-    medium
     maker
-    dimensions
-    people
-    creditline
-  }
-}`
-
-    this.objectsLarge = `query {
-  objects[[]] {
-    id
-    title
+    period
+    object_name
     medium
-    maker
-    dimensions
-    people
-    creditline
-    raw {
-        ...on EmuseumObject {
-          primaryMaker {
-            label
-            value
-          }
-          primaryMedia {
-            value
-          }
-          displayDate {
-            label
-            value
-          }
-          invno {
-            label
-            value
-          }
-          id {
-            label
-            value 
-          }
-          title {
-            label
-            value
-          }
-          classification {
-            label
-            value
-          }
-          creditline {
-            label
-            value
-          }
-          dimensions {
-            label
-            value
-          }
-          medium {
-            label
-            value
-          }
-          people {
-            label
-            values
-          }
-        }
-      ...on CsvObject {
-        accession_number
-        maker
-        ULAN
-        department
-        culture
-        period
-        creation_date
-        creation_date_earliest
-        creation_date_latest
-        accesion_date
-        source_name
-        object_name
-        credit_line
-        paper_support
-        catalogue_raisonne
-        portfolio
-        signed
-        marks
-        inscriptions
-        filename
-      }      
+    remote {
+      status
+      original_image_id
+      public_id
+      version
+      signature
+      width
+      height
+      format
     }
   }
 }`
 
-    this.medias = `query {
-  medias[[]] {
-    name
+    this.objectLarge = `query {
+  object[[]] {
+    id
+    accession_number
+    title
+    maker
+    ulan
+    department    
+    classification
+    culture
+    period
+    creation_date
+    creation_date_earliest
+    creation_date_latest
+    accession_date
+    source_name
+    object_name
+    medium
+    description
+    credit_line
+    paper_support
+    catalogue_raisonne
+    portfolio
+    signed
+    marks
+    inscriptions
+    filename
+    dimensions
+    element_type
+    width_cm
+    height_cm
+    depth_cm
+    width_in
+    height_in
+    depth_in
+    area_in
+    size_s_m_l
+    is_3d
+    orientation_p_l_s
+    copyright_holder
+    remote {
+      status
+      original_image_id
+      public_id
+      version
+      signature
+      width
+      height
+      format
+    }
   }
 }`
 
-    this.people = `query {
-  people[[]] {
-    name
+    this.objectNames = `query {
+  objectNames[[]] {
+    id
+    title
+    count
   }
 }`
 
-    this.eventsMini = `query {
-  events[[]] {
-    eventId
+    this.makers = `query {
+  makers[[]] {
+    id
+    title
+    count
   }
 }`
 
-    this.eventsMedium = `query {
-  events[[]] {
-    eventId
-    eventName
-    facultyMember
-    subjectAndCourse
-    subject
-    courseNumber
-    institution
-    Description
-    startDate
-    histObjXIDs
+    this.periods = `query {
+  periods[[]] {
+    id
+    title
+    count
   }
 }`
 
-    this.eventsLarge = `query {
-  events[[]] {
-    eventId
-    eventName
-    facultyMember
-    subjectAndCourse
-    subject
-    courseNumber
-    institution
-    Description
-    startDate
-    histObjXIDs
-    objects {
-      id
-      title
-      medium
-      maker
-      dimensions
-      people
-      creditline
-    }        
-  }
-}`
-
-    this.places = `query {
-  places[[]] {
-    name
+    this.mediums = `query {
+  mediums[[]] {
+    id
+    title
+    count
   }
 }`
   }
