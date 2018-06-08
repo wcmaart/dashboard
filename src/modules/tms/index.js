@@ -249,6 +249,8 @@ const getUniques = async () => {
   tmsses.forEach((tms) => {
     const processDir = path.join(tmsDir, tms, 'process')
     const processedDir = path.join(tmsDir, tms, 'processed')
+    const perfectDir = path.join(tmsDir, tms, 'perfect')
+
     const checkDirs = []
     if (fs.existsSync(processDir)) checkDirs.push(processDir)
     if (fs.existsSync(processedDir)) checkDirs.push(processedDir)
@@ -267,36 +269,90 @@ const getUniques = async () => {
           const objectRaw = fs.readFileSync(path.join(pDir, subFolder, file), 'utf-8')
           const object = JSON.parse(objectRaw)
 
+          const perfectFilename = path.join(perfectDir, subFolder, file)
+          let remote = null
+          if (fs.existsSync(perfectFilename)) {
+            const perfectObjectRaw = fs.readFileSync(perfectFilename, 'utf-8')
+            const perfectObject = JSON.parse(perfectObjectRaw)
+            if ('remote' in perfectObject && perfectObject.remote !== null) {
+              remote = perfectObject.remote
+            }
+          }
           //  Object Types
           if ('object_name' in object && object.object_name !== null && object.object_name !== '') {
             if (!(object.object_name in objectTypes)) {
-              objectTypes[object.object_name] = 0
+              objectTypes[object.object_name] = {
+                count: 0,
+                images: [],
+                keyImage: null
+              }
             }
-            objectTypes[object.object_name] += 1
+            objectTypes[object.object_name].count += 1
+            //  If there's an image we want to make a note of that to, so
+            //  we can use it when displaying the index page for these thing
+            //  We are going to build up an array, from which we'll pick 5
+            //  random items, and a "keyImage" which will just be the first
+            //  one we come across
+            if (remote !== null) {
+              objectTypes[object.object_name].images.push(remote)
+              if (objectTypes[object.object_name].keyImage === null) {
+                objectTypes[object.object_name].keyImage = remote
+              }
+            }
           }
 
           //  Makers
           if ('maker' in object && object.maker !== null && object.maker !== '') {
             if (!(object.maker in objectMakers)) {
-              objectMakers[object.maker] = 0
+              objectMakers[object.maker] = {
+                count: 0,
+                images: [],
+                keyImage: null
+              }
             }
-            objectMakers[object.maker] += 1
+            objectMakers[object.maker].count += 1
+            if (remote !== null) {
+              objectMakers[object.maker].images.push(remote)
+              if (objectMakers[object.maker].keyImage === null) {
+                objectMakers[object.maker].keyImage = remote
+              }
+            }
           }
 
           //  Periods
           if ('period' in object && object.period !== null && object.period !== '') {
             if (!(object.period in objectPeriods)) {
-              objectPeriods[object.period] = 0
+              objectPeriods[object.period] = {
+                count: 0,
+                images: [],
+                keyImage: null
+              }
             }
-            objectPeriods[object.period] += 1
+            objectPeriods[object.period].count += 1
+            if (remote !== null) {
+              objectPeriods[object.period].images.push(remote)
+              if (objectPeriods[object.period].keyImage === null) {
+                objectPeriods[object.period].keyImage = remote
+              }
+            }
           }
 
           //  Materials
           if ('medium' in object && object.medium !== null && object.medium !== '') {
             if (!(object.medium in objectMaterials)) {
-              objectMaterials[object.medium] = 0
+              objectMaterials[object.medium] = {
+                count: 0,
+                images: [],
+                keyImage: null
+              }
             }
-            objectMaterials[object.medium] += 1
+            objectMaterials[object.medium].count += 1
+            if (remote !== null) {
+              objectMaterials[object.medium].images.push(remote)
+              if (objectMaterials[object.medium].keyImage === null) {
+                objectMaterials[object.medium].keyImage = remote
+              }
+            }
           }
         })
       })
@@ -343,7 +399,22 @@ const getUniques = async () => {
 
     Object.entries(bulkThis.source).forEach((keyVal) => {
       const objectType = keyVal[0]
-      const count = keyVal[1]
+      const data = keyVal[1]
+      const count = data.count
+      const images = data.images
+      const keyImage = data.keyImage
+      let newImages = []
+      const maxImages = 5
+      //  If we have more than 5 images then we need to randomly pick 5 to use
+      //  otherwise if we have 5 or less just use them as is
+      if (images.length > maxImages) {
+        while (newImages.length < 5) {
+          newImages.push(images.splice(Math.floor(Math.random() * images.length), 1))
+        }
+      } else {
+        newImages = images
+      }
+
       bulkThisArray.push({
         index: {
           _id: bulkThis.counter
@@ -352,7 +423,9 @@ const getUniques = async () => {
       bulkThisArray.push({
         id: bulkThis.counter,
         title: objectType,
-        count: count
+        count,
+        images: newImages,
+        keyImage
       })
       bulkThis.counter += 1
     })
