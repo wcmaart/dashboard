@@ -274,7 +274,7 @@ const getUniques = async () => {
           if (fs.existsSync(perfectFilename)) {
             const perfectObjectRaw = fs.readFileSync(perfectFilename, 'utf-8')
             const perfectObject = JSON.parse(perfectObjectRaw)
-            if ('remote' in perfectObject && perfectObject.remote !== null) {
+            if ('remote' in perfectObject && perfectObject.remote !== null && 'status' in perfectObject.remote && perfectObject.remote.status === 'ok') {
               remote = perfectObject.remote
             }
           }
