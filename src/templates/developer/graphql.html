@@ -378,9 +378,21 @@
 
       <p>
         Valid filters are:
-        <code class="red">page</code>,
-        <code class="red">per_page</code>, for pagination, the size and number of each page.
-        <br />
+        <code class="red">page</code> &amp;
+        <code class="red">per_page</code>, for pagination, the size and number of each page. And
+        <code class="red">sort</code> &amp;
+        <code class="red">sort_field</code> for sorting the results.
+      </p>
+
+      <p>
+        Valid values for
+        <code class="red">sort</code> are
+        <code>"asc"</code> &amp;
+        <code>"desc"</code> to change the sort order. Valid fields
+        <code class="red">sort_field</code> are currently
+        <code>"id"</code>,
+        <code>"title"</code> &amp;
+        <code>"count"</code>.
       </p>
 
       <p>
@@ -433,28 +445,40 @@
 
       <p>
         Valid filters are:
-        <code class="red">page</code>,
-        <code class="red">per_page</code>, for pagination, the size and number of each page
-        <br />
+        <code class="red">page</code> &amp;
+        <code class="red">per_page</code>, for pagination, the size and number of each page. And
+        <code class="red">sort</code> &amp;
+        <code class="red">sort_field</code> for sorting the results.
+      </p>
+
+      <p>
+        Valid values for
+        <code class="red">sort</code> are
+        <code>"asc"</code> &amp;
+        <code>"desc"</code> to change the sort order. Valid fields
+        <code class="red">sort_field</code> are currently
+        <code>"id"</code>,
+        <code>"title"</code> &amp;
+        <code>"count"</code>.
       </p>
 
       <p class="runinexplore">
-        <a href='{{exploreQuery queries.makers "" config.graphql.host}}'>Run in the playground</a>
+        <a href='{{exploreQuery queries.makers "(sort: \"asc\", sort_field: \"title\")" config.graphql.host}}'>Run in the playground</a>
       </p>
-      <pre class="query">{{{graphQLQuery queries.makers ''}}}</pre>
+      <pre class="query">{{{graphQLQuery queries.makers '(sort: "asc", sort_field: "title")'}}}</pre>
 
       <p>
         cURL
       </p>
       <p>
-        <pre class="query terminal">{{{curlQuery queries.makers '' config.graphql.host user.apitoken}}}</pre>
+        <pre class="query terminal">{{{curlQuery queries.makers '(sort: "asc", sort_field: "title")' config.graphql.host user.apitoken}}}</pre>
       </p>
 
       <p>
         NodeJS.
       </p>
       <p>
-        <pre class="query node">{{{nodeQuery queries.makers '' config.graphql.host user.apitoken}}}</pre>
+        <pre class="query node">{{{nodeQuery queries.makers '(sort: "asc", sort_field: "title")' config.graphql.host user.apitoken}}}</pre>
       </p>
 
 
@@ -484,9 +508,21 @@
 
       <p>
         Valid filters are:
-        <code class="red">page</code>,
-        <code class="red">per_page</code>, for pagination, the size and number of each page
-        <br />
+        <code class="red">page</code> &amp;
+        <code class="red">per_page</code>, for pagination, the size and number of each page. And
+        <code class="red">sort</code> &amp;
+        <code class="red">sort_field</code> for sorting the results.
+      </p>
+
+      <p>
+        Valid values for
+        <code class="red">sort</code> are
+        <code>"asc"</code> &amp;
+        <code>"desc"</code> to change the sort order. Valid fields
+        <code class="red">sort_field</code> are currently
+        <code>"id"</code>,
+        <code>"title"</code> &amp;
+        <code>"count"</code>.
       </p>
 
       <p class="runinexplore">
@@ -535,28 +571,40 @@
 
       <p>
         Valid filters are:
-        <code class="red">page</code>,
-        <code class="red">per_page</code>, for pagination, the size and number of each page
-        <br />
+        <code class="red">page</code> &amp;
+        <code class="red">per_page</code>, for pagination, the size and number of each page. And
+        <code class="red">sort</code> &amp;
+        <code class="red">sort_field</code> for sorting the results.
+      </p>
+
+      <p>
+        Valid values for
+        <code class="red">sort</code> are
+        <code>"asc"</code> &amp;
+        <code>"desc"</code> to change the sort order. Valid fields
+        <code class="red">sort_field</code> are currently
+        <code>"id"</code>,
+        <code>"title"</code> &amp;
+        <code>"count"</code>.
       </p>
 
       <p class="runinexplore">
-        <a href='{{exploreQuery queries.mediums "" config.graphql.host}}'>Run in the playground</a>
+        <a href='{{exploreQuery queries.mediums "(sort: \"desc\", sort_field: \"count\")" config.graphql.host}}'>Run in the playground</a>
       </p>
-      <pre class="query">{{{graphQLQuery queries.mediums ''}}}</pre>
+      <pre class="query">{{{graphQLQuery queries.mediums '(sort: "desc", sort_field: "count")'}}}</pre>
 
       <p>
         cURL
       </p>
       <p>
-        <pre class="query terminal">{{{curlQuery queries.mediums '' config.graphql.host user.apitoken}}}</pre>
+        <pre class="query terminal">{{{curlQuery queries.mediums '(sort: "desc", sort_field: "count")' config.graphql.host user.apitoken}}}</pre>
       </p>
 
       <p>
         NodeJS.
       </p>
       <p>
-        <pre class="query node">{{{nodeQuery queries.mediums '' config.graphql.host user.apitoken}}}</pre>
+        <pre class="query node">{{{nodeQuery queries.mediums '(sort: "desc", sort_field: "count")' config.graphql.host user.apitoken}}}</pre>
       </p>
 
       <hr />
