@@ -140,6 +140,26 @@ class Queries {
     id
     title
     count
+    images {
+      status
+      original_image_id
+      public_id
+      version
+      signature
+      width
+      height
+      format
+    }
+    keyImage {
+      status
+      original_image_id
+      public_id
+      version
+      signature
+      width
+      height
+      format
+    }
   }
 }`
 
@@ -148,6 +168,26 @@ class Queries {
     id
     title
     count
+    images {
+      status
+      original_image_id
+      public_id
+      version
+      signature
+      width
+      height
+      format
+    }
+    keyImage {
+      status
+      original_image_id
+      public_id
+      version
+      signature
+      width
+      height
+      format
+    }
   }
 }`
 
@@ -156,6 +196,26 @@ class Queries {
     id
     title
     count
+    images {
+      status
+      original_image_id
+      public_id
+      version
+      signature
+      width
+      height
+      format
+    }
+    keyImage {
+      status
+      original_image_id
+      public_id
+      version
+      signature
+      width
+      height
+      format
+    }  
   }
 }`
 
@@ -164,6 +224,26 @@ class Queries {
     id
     title
     count
+    images {
+      status
+      original_image_id
+      public_id
+      version
+      signature
+      width
+      height
+      format
+    }
+    keyImage {
+      status
+      original_image_id
+      public_id
+      version
+      signature
+      width
+      height
+      format
+    }
   }
 }`
   }
