@@ -366,6 +366,17 @@
       </p>
 
       <p>
+        Because object_names don't really have images, you can ask for the
+        <code>images</code>and
+        <code>keyImage</code>fields which will give you images from objects matching the object_name. The first
+        <code>images</code>will return a randomly selected (updated hourly) array of 5 images from the objects.
+        <code>keyImage</code>will return you what the system considered the main image for the object_name, currently this is just
+        the first image it finds, but this may change in the future. The
+        <code>keyImage</code>should be considered more consistent while the
+        <code>images</code>tries not to put emphasis on any particular image.
+      </p>
+
+      <p>
         Valid filters are:
         <code class="red">page</code>,
         <code class="red">per_page</code>, for pagination, the size and number of each page.
@@ -410,6 +421,17 @@
       </p>
 
       <p>
+        Because makers don't really have images, you can ask for the
+        <code>images</code>and
+        <code>keyImage</code>fields which will give you images from objects matching the maker. The first
+        <code>images</code>will return a randomly selected (updated hourly) array of 5 images from the objects.
+        <code>keyImage</code>will return you what the system considered the main image for the maker, currently this is just the
+        first image it finds, but this may change in the future. The
+        <code>keyImage</code>should be considered more consistent while the
+        <code>images</code>tries not to put emphasis on any particular image.
+      </p>
+
+      <p>
         Valid filters are:
         <code class="red">page</code>,
         <code class="red">per_page</code>, for pagination, the size and number of each page
@@ -450,6 +472,17 @@
       </p>
 
       <p>
+        Because periods don't really have images, you can ask for the
+        <code>images</code>and
+        <code>keyImage</code>fields which will give you images from objects matching the period. The first
+        <code>images</code>will return a randomly selected (updated hourly) array of 5 images from the objects.
+        <code>keyImage</code>will return you what the system considered the main image for the period, currently this is just the
+        first image it finds, but this may change in the future. The
+        <code>keyImage</code>should be considered more consistent while the
+        <code>images</code>tries not to put emphasis on any particular image.
+      </p>
+
+      <p>
         Valid filters are:
         <code class="red">page</code>,
         <code class="red">per_page</code>, for pagination, the size and number of each page
@@ -487,6 +520,17 @@
       <p>
         This query returns all the mediums (for use in the
         <code class="red">medium</code> filter).
+      </p>
+
+      <p>
+        Because mediums don't really have images, you can ask for the
+        <code>images</code>and
+        <code>keyImage</code>fields which will give you images from objects matching the medium. The first
+        <code>images</code>will return a randomly selected (updated hourly) array of 5 images from the objects.
+        <code>keyImage</code>will return you what the system considered the main image for the medium, currently this is just the
+        first image it finds, but this may change in the future. The
+        <code>keyImage</code>should be considered more consistent while the
+        <code>images</code>tries not to put emphasis on any particular image.
       </p>
 
       <p>
