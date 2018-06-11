@@ -117,6 +117,23 @@ exports.index = (req, res) => {
         config.set('timers.cloudinary', 20000)
         cloudinary.startUploading()
       }
+
+      //  Same for color interval
+      if ('intervalColor' in req.body && req.body.intervalColor !== '') {
+        try {
+          const newIntervalColor = parseInt(req.body.intervalColor, 10)
+          if (newIntervalColor > 0) {
+            config.set('timers.cloudinaryColoring', parseInt(req.body.intervalColor, 10))
+            cloudinary.startColoring()
+          }
+        } catch (err) {
+          console.error(err)
+        }
+      } else {
+        config.set('timers.intervalColor', 20000)
+        cloudinary.startColoring()
+      }
+
       return res.redirect('/config')
     }
   }

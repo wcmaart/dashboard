@@ -441,9 +441,11 @@ tms.startFetching()
 tms.getUniques()
 
 //  This starts off checking for images to upload to cloudinary
+//  and getting colour information
 const cloudinary = require('./app/modules/cloudinary')
 cloudinary.startUploading()
+cloudinary.startColoring()
 
-//  This starts off checking for images to upload to cloudinary
+//  This starts off checking for images to upload to elastic search
 const elasticsearch = require('./app/modules/elasticsearch')
 elasticsearch.startUpserting()
