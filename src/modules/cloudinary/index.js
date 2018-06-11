@@ -228,6 +228,18 @@ const colorImage = (stub, id) => {
 
   cloudinary.api.resource(perfectFile.remote.public_id,
     function (result) {
+      if ('error' in result) {
+        const endTime = new Date().getTime()
+        tmsLogger.object(`Failed valid cloudinary color check for object ${id} for ${stub}`, {
+          action: 'error',
+          id: id,
+          stub: stub,
+          ms: endTime - startTime,
+          error: result
+        })
+        return
+      }
+
       const esclient = new elasticsearch.Client(elasticsearchConfig)
       const colors = {}
       if ('colors' in result) {
@@ -359,7 +371,7 @@ const checkImagesColor = () => {
           if (foundImageToColor === true) return
           const perfectFileRaw = fs.readFileSync(path.join(tmsDir, subFolder, file), 'utf-8')
           const perfectFile = JSON.parse(perfectFileRaw)
-          if (perfectFile.tmsSource !== null && perfectFile.remote !== null && !('color' in perfectFile)) {
+          if (perfectFile.tmsSource !== null && perfectFile.remote !== null && (!('color' in perfectFile) || perfectFile.color.predominant === '{}')) {
             foundImageToColor = true
             colorImage(tms, file.split('.')[0])
           }
