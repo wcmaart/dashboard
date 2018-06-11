@@ -264,6 +264,24 @@
                   {{/if}}>
             </tr>
             <tr>
+              <td style="width: 20%; vertical-align: top;">
+                <br />
+                <p>Color interval in ms</p>
+              </td>
+              <td>
+                <br />
+                <p>
+                  <strong>Note:</strong> This sets the intervals in the cycle of checking for images that need coloring, see notes
+                  above for speed and throttling. See also the
+                  <a href="/stats/logs#imagesColored">logs page</a> and
+                  <a href="/stats">stats page</a>.
+                </p>
+                <input type="text" name="intervalColor" placeholder="20000" {{#if config.timers.cloudinaryColoring}}value="{{config.timers.cloudinaryColoring}}"
+                  {{/if}}>
+            </tr>
+
+            cloudinaryColoring
+            <tr>
               <td colspan="2">
                 <button type="submit" value="updatecloudinary" name="action">Update</button>
               </td>

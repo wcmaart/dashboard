@@ -117,6 +117,7 @@ exports.logs = (req, res) => {
   const last100ImagesUploaded = []
   const last100PagesReceived = []
   const last100ItemsUpserted = []
+  const last100ImagesColored = []
 
   const lr = new LineByLineReader(path.join(rootDir, lastLog))
   lr.on('line', function (line) {
@@ -158,6 +159,14 @@ exports.logs = (req, res) => {
         last100ItemsUpserted.shift()
       }
     }
+
+    //  And the colored items
+    if ('action' in data && data.action === 'coloredImage') {
+      last100ImagesColored.push(logEntry)
+      if (last100ImagesColored.length > 100) {
+        last100ImagesColored.shift()
+      }
+    }
   })
   lr.on('end', function () {
     req.templateValues.last100Lines = last100Lines.reverse()
@@ -197,6 +206,18 @@ exports.logs = (req, res) => {
       req.templateValues.averageItemsUpsertedms = 0
     }
     req.templateValues.last100ItemsUpserted = last100ItemsUpserted.reverse()
+
+    //  Get the total ms spent uploading the images
+    const itemsColoredms = last100ImagesColored.map((record) => {
+      return parseInt(record.data.ms, 10)
+    })
+    //  Get the average time to upload an image
+    if (itemsColoredms.length > 0) {
+      req.templateValues.averageImagesColoredms = Math.floor(itemsColoredms.reduce((p, c) => p + c, 0) / itemsColoredms.length)
+    } else {
+      req.templateValues.averageImagesColoredms = 0
+    }
+    req.templateValues.last100ImagesColored = last100ImagesColored.reverse()
 
     return res.render('stats/logs', req.templateValues)
   })
