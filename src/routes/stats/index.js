@@ -85,6 +85,28 @@ exports.index = (req, res) => {
       }
       thisTMS.timeToUpsertItems = new Date().getTime() + timeToUpsertItems
 
+      //  Now we are doing roughly the same with the events
+      let eventsWaitingToBeProcessed = 0
+      const processEventsDir = path.join(rootDir, 'events', tms.stub, 'process')
+      if (fs.existsSync(processEventsDir)) {
+        const subFolders = fs.readdirSync(processEventsDir)
+        subFolders.forEach((subFolder) => {
+          const jsonFiles = fs.readdirSync(path.join(processEventsDir, subFolder)).filter((file) => {
+            const filesSplit = file.split('.')
+            if (filesSplit.length !== 2) return false
+            if (filesSplit[1] !== 'json') return false
+            return true
+          })
+          eventsWaitingToBeProcessed += jsonFiles.length
+        })
+      }
+      thisTMS.eventsWaitingToBeProcessed = eventsWaitingToBeProcessed
+      let timeToUpsertEvents = eventsWaitingToBeProcessed * 20000 // (20,000 ms is the default time between uploading)
+      if (timers !== null && 'elasticsearch' in timers) {
+        timeToUpsertEvents = eventsWaitingToBeProcessed * parseInt(timers.elasticsearch, 10)
+      }
+      thisTMS.timeToUpsertEvents = new Date().getTime() + timeToUpsertEvents
+
       const endTime = new Date().getTime()
       thisTMS.ms = endTime - startTime
       newTMS.push(thisTMS)
@@ -117,6 +139,7 @@ exports.logs = (req, res) => {
   const last100ImagesUploaded = []
   const last100PagesReceived = []
   const last100ItemsUpserted = []
+  const last100EventsUpserted = []
   const last100ImagesColored = []
 
   const lr = new LineByLineReader(path.join(rootDir, lastLog))
@@ -160,6 +183,14 @@ exports.logs = (req, res) => {
       }
     }
 
+    //  And the upserted events
+    if ('action' in data && data.action === 'upsertedEvent') {
+      last100EventsUpserted.push(logEntry)
+      if (last100EventsUpserted.length > 100) {
+        last100EventsUpserted.shift()
+      }
+    }
+
     //  And the colored items
     if ('action' in data && data.action === 'coloredImage') {
       last100ImagesColored.push(logEntry)
@@ -199,13 +230,25 @@ exports.logs = (req, res) => {
     const itemsUpsertedms = last100ItemsUpserted.map((record) => {
       return parseInt(record.data.ms, 10)
     })
-    //  Get the average time to upload an image
+    //  Get the average time to upsert an object
     if (itemsUpsertedms.length > 0) {
       req.templateValues.averageItemsUpsertedms = Math.floor(itemsUpsertedms.reduce((p, c) => p + c, 0) / itemsUpsertedms.length)
     } else {
       req.templateValues.averageItemsUpsertedms = 0
     }
     req.templateValues.last100ItemsUpserted = last100ItemsUpserted.reverse()
+
+    //  Get the total ms spent uploading the images
+    const eventsUpsertedms = last100EventsUpserted.map((record) => {
+      return parseInt(record.data.ms, 10)
+    })
+    //  Get the average time to upsert an event
+    if (eventsUpsertedms.length > 0) {
+      req.templateValues.averageEventsUpsertedms = Math.floor(eventsUpsertedms.reduce((p, c) => p + c, 0) / eventsUpsertedms.length)
+    } else {
+      req.templateValues.averageEventsUpsertedms = 0
+    }
+    req.templateValues.last100EventsUpserted = last100EventsUpserted.reverse()
 
     //  Get the total ms spent uploading the images
     const itemsColoredms = last100ImagesColored.map((record) => {

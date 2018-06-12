@@ -38,6 +38,7 @@ exports.index = (req, res) => {
           if (newInterval > 0) {
             config.set('timers.elasticsearch', parseInt(req.body.interval, 10))
             elasticsearch.startUpserting()
+            elasticsearch.startUpsertingEvents()
           }
         } catch (err) {
           console.error(err)
@@ -45,6 +46,7 @@ exports.index = (req, res) => {
       } else {
         config.set('timers.elasticsearch', 20000)
         elasticsearch.startUpserting()
+        elasticsearch.startUpsertingEvents()
       }
 
       return res.redirect('/config')

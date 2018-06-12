@@ -29,6 +29,9 @@
             <a href="#items">Last 100 items upserted (Average ms: {{prettyNumber averageItemsUpsertedms}}ms)</a>
           </li>
           <li>
+            <a href="#events">Last 100 events upserted (Average ms: {{prettyNumber averageEventsUpsertedms}}ms)</a>
+          </li>
+          <li>
             <a href="#pages">Last 100 pages fetched from TMS (Average ms: {{prettyNumber averagePagesReceivedms}}ms)</a>
           </li>
         </ul>
@@ -135,6 +138,34 @@
           </thead>
           <tbody>
             {{#each last100ItemsUpserted}}
+            <tr>
+              <td>{{timeAgo timestamp}}</td>
+              <td>{{data.action}}</td>
+              <td>{{data.message}}</td>
+              <td style="text-align: right">{{#if data.ms}}{{prettyNumber data.ms}}ms{{else}}&nbsp;{{/if}}</td>
+            </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      </p>
+
+      <hr>
+
+      <h3>
+        <a name="events">Last 100 events upserted (Average ms: {{prettyNumber averageEventsUpsertedms}}ms)</a>
+      </h3>
+      <p>
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Action</th>
+              <th>Message</th>
+              <th>ms</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each last100EventsUpserted}}
             <tr>
               <td>{{timeAgo timestamp}}</td>
               <td>{{data.action}}</td>

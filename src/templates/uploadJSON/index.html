@@ -59,6 +59,37 @@
           </tr>
         </table>
       </form>
+
+      <form method="post" enctype="multipart/form-data">
+        <table class="api">
+          <tr>
+            <td style="width: 40%">Events JSON file:</td>
+            <td>
+              <input type="file" name="eventsJSON">
+            </td>
+          </tr>
+          <tr>
+            <td>Select TMS system</td>
+            <td>
+              <ul class="tmsSelect">
+                {{#each config.tms}}
+                <li>
+                  <input type="radio" name="tms" value="{{stub}}" {{#ifEqual @index 0}}checked{{/ifEqual}}>{{stub}}
+                </li>
+                {{/each}}
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <br />
+              <button type="submit" value="updateEventsJSON" name="action">Upload</button>
+            </td>
+            <td>&nbsp;</td>
+          </tr>
+        </table>
+      </form>
+
       {{else}} {{#if user.role.isAdmin}}
       <p>
         Before you can upload an objects XML file, you need to register a TMS system that the file has supplemental information for.
