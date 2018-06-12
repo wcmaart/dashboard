@@ -166,6 +166,27 @@ const checkItems = () => {
   }
 }
 
+const getImageForEvent = (tms, ids) => {
+  let remote = null
+  const tmsDir = path.join(rootDir, 'tms')
+  const perfectDir = path.join(tmsDir, tms, 'perfect')
+
+  ids.forEach((id) => {
+    if (remote === null) {
+      const subFolder = String(Math.floor(id / 1000) * 1000)
+      const perfectFilename = path.join(perfectDir, subFolder, `${id}.json`)
+      if (fs.existsSync(perfectFilename)) {
+        const perfectObjectRaw = fs.readFileSync(perfectFilename, 'utf-8')
+        const perfectObject = JSON.parse(perfectObjectRaw)
+        if ('remote' in perfectObject && perfectObject.remote !== null && 'status' in perfectObject.remote && perfectObject.remote.status === 'ok') {
+          remote = perfectObject.remote
+        }
+      }
+    }
+  })
+  return remote
+}
+
 /**
  * This method tries to grab a record of an object that has an image that needs
  * uploading and has a go at uploading, if it manages it then it puts the resulting
@@ -198,8 +219,11 @@ const upsertEvent = async (stub, id) => {
   const upsertEvent = processFile
   upsertEvent.source = stub
 
-  //  Temp delete this file
-  // delete upsertEvent.ExhObjXrefs
+  //  Go and get a key image for the event
+  const keyImage = getImageForEvent(stub, upsertEvent.ExhObjXrefs)
+  if (keyImage !== null) {
+    upsertEvent.keyImage = keyImage
+  }
 
   const esclient = new elasticsearch.Client(elasticsearchConfig)
   const startTime = new Date().getTime()
