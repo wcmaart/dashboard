@@ -85,6 +85,28 @@ exports.index = (req, res) => {
       }
       thisTMS.timeToUpsertItems = new Date().getTime() + timeToUpsertItems
 
+      //  Now we are doing roughly the same with the events
+      let eventsWaitingToBeProcessed = 0
+      const processEventsDir = path.join(rootDir, 'events', tms.stub, 'process')
+      if (fs.existsSync(processEventsDir)) {
+        const subFolders = fs.readdirSync(processEventsDir)
+        subFolders.forEach((subFolder) => {
+          const jsonFiles = fs.readdirSync(path.join(processEventsDir, subFolder)).filter((file) => {
+            const filesSplit = file.split('.')
+            if (filesSplit.length !== 2) return false
+            if (filesSplit[1] !== 'json') return false
+            return true
+          })
+          eventsWaitingToBeProcessed += jsonFiles.length
+        })
+      }
+      thisTMS.eventsWaitingToBeProcessed = eventsWaitingToBeProcessed
+      let timeToUpsertEvents = eventsWaitingToBeProcessed * 20000 // (20,000 ms is the default time between uploading)
+      if (timers !== null && 'elasticsearch' in timers) {
+        timeToUpsertEvents = eventsWaitingToBeProcessed * parseInt(timers.elasticsearch, 10)
+      }
+      thisTMS.timeToUpsertEvents = new Date().getTime() + timeToUpsertEvents
+
       const endTime = new Date().getTime()
       thisTMS.ms = endTime - startTime
       newTMS.push(thisTMS)

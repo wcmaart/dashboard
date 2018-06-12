@@ -341,8 +341,8 @@ exports.startUpsertingEvents = () => {
   const config = new Config()
   const timers = config.get('timers')
   let interval = 20000
-  if (timers !== null && 'elasticsearchEvents' in timers) {
-    interval = parseInt(timers.elasticsearchEvents, 10)
+  if (timers !== null && 'elasticsearch' in timers) {
+    interval = parseInt(timers.elasticsearch, 10)
   }
   global.elasticsearchEventsTmr = setInterval(() => {
     checkEvents()
