@@ -449,3 +449,4 @@ cloudinary.startColoring()
 //  This starts off checking for images to upload to elastic search
 const elasticsearch = require('./app/modules/elasticsearch')
 elasticsearch.startUpserting()
+elasticsearch.startUpsertingEvents()
