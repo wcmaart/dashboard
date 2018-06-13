@@ -82,6 +82,34 @@ class Queries {
   }
 }`
 
+    this.objectsColor = `query {
+  objects[[]] {
+    id
+    title
+    remote {
+      public_id
+      version
+      format
+    }
+    color {
+      predominant {
+        color
+        value
+      }
+      search {
+        google {
+          color
+          value
+        }
+        cloudinary {
+          color
+          value
+        }
+      }
+    }
+  }
+}`
+
     this.objectLarge = `query {
   object[[]] {
     id
@@ -123,6 +151,95 @@ class Queries {
     orientation_p_l_s
     copyright_holder
     remote {
+      status
+      original_image_id
+      public_id
+      version
+      signature
+      width
+      height
+      format
+    }
+    events {
+      id
+      title
+      planningNotes
+      beginISODate
+      beginDate
+      isInHouse
+      objects
+      curNotes
+      endISODate
+      endDate
+      keyImage {
+        status
+        original_image_id
+        public_id
+        version
+        signature
+        width
+        height
+        format
+      }
+    }
+  }
+}`
+
+    this.events = `query {
+  events[[]] {
+    id
+    title
+    planningNotes
+    beginISODate
+    beginDate
+    isInHouse
+    objects
+    curNotes
+    endISODate
+    endDate
+    keyImage {
+      status
+      original_image_id
+      public_id
+      version
+      signature
+      width
+      height
+      format
+    }
+  }
+}`
+
+    this.event = `query {
+  event[[]] {
+    id
+    title
+    planningNotes
+    beginISODate
+    beginDate
+    isInHouse
+    objects {
+      id
+      title
+      maker
+      period
+      object_name
+      medium
+      remote {
+        status
+        original_image_id
+        public_id
+        version
+        signature
+        width
+        height
+        format
+      }
+     }
+    curNotes
+    endISODate
+    endDate
+    keyImage {
       status
       original_image_id
       public_id

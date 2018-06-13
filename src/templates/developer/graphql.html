@@ -53,10 +53,19 @@
                   <li>
                     <a href="#filtering">Filtering/Searching Objects</a>
                   </li>
+                  <li>
+                    <a href="#filteringbycolor">Filtering/Searching by Color</a>
+                  </li>
                 </ul>
               </li>
               <li>
                 <a href="#object">Object</a>
+              </li>
+              <li>
+                <a href="#events">Events</a>
+              </li>
+              <li>
+                <a href="#event">event</a>
               </li>
               <li>
                 <a href="#object_names">object_names (Object Type)</a>
@@ -204,11 +213,25 @@
         Valid filters are:
         <code class="red">page</code>,
         <code class="red">per_page</code>,
+        <code class="red">sort_field</code>,
+        <code class="red">sort</code>,
         <code class="red">object_name</code>,
         <code class="red">maker</code>,
         <code class="red">period</code>,
-        <code class="red">medium</code> &amp;
-        <code class="red">title</code>.
+        <code class="red">medium</code>,
+        <code class="red">title</code>,
+        <code class="red">color</code>,
+        <code class="red">color_threshold</code> &amp;
+        <code class="red">color_source</code>.
+      </p>
+
+      <p>
+        The only valid value for
+        <code class="red">sort_field</code> is
+        <code>title</code>, values for
+        <code class="red">sort</code> are
+        <code>asc</code> &amp;
+        <code>desc</code>.
       </p>
 
       <p>
@@ -324,6 +347,80 @@
       <hr />
 
       <h3>
+        <a name="filteringbycolor">Filtering/Searching by Color</a>
+      </h3>
+
+      <p>
+        If you wish to search for objects by colour, you can do that with the following filters:
+        <code class="red">color</code>,
+        <code class="red">color_threshold</code> &amp;
+        <code class="red">color_source</code>,
+      </p>
+
+      <p>
+        There are two sources:
+        <code>google</code> and
+        <code>cloudinary</code>, the default is google and these are the following valid colours.
+      </p>
+      <p>
+        <code>gray</code>,
+        <code>black</code>,
+        <code>orange</code>,
+        <code>brown</code>,
+        <code>white</code>,
+        <code>yellow</code>,
+        <code>teal</code>,
+        <code>blue</code>,
+        <code>green</code>,
+        <code>red</code>,
+        <code>pink</code> &amp;
+        <code>purple</code>.
+      </p>
+
+      <p>
+        Cloudinary decided that the following were
+        <em>slightly</em> more useful, if you do too then specify
+        <code>cloudinary</code> as your
+        <code class="red">color_source</code>.
+      </p>
+      <p>
+        <code>gray</code>,
+        <code>black</code>,
+        <code>orange</code>,
+        <code>brown</code>,
+        <code>white</code>,
+        <code>yellow</code>,
+        <code>teal</code>,
+        <code>blue</code>,
+        <code>green</code>,
+        <code>red</code>,
+        <code>pink</code>,
+        <code>purple</code>,
+        <code>lightblue</code>,
+        <code>olive</code>,
+        <code>lime</code> &amp;
+        <code>cyan</code>.
+      </p>
+
+      <p>Finally you can specify the
+        <code class="red">color_threshold</code> if you want a value different to the default of 75.0. Valid values are floats between 0.0
+        and 100.0, the higher the threshold the fewer the results.
+      </p>
+      <p>
+        You can also ask for
+        <code>predominant</code> colors in the results, which will return you hex values of the predominant colours :) See the
+        example below.
+      </p>
+
+      <p class="runinexplore">
+        <a href='{{exploreQuery queries.objectsColor "(color: \"orange\", color_threshold: 70.0, color_source: \"google\")" config.graphql.host}}'>Run in the playground</a>
+      </p>
+      <pre class="query">{{{graphQLQuery queries.objectsColor '(color: "orange", color_threshold: 70.0, color_source: "google")'}}}</pre>
+
+      <hr />
+
+
+      <h3>
         <a name="object">Object</a>
       </h3>
 
@@ -352,6 +449,45 @@
         <pre class="query node">{{{nodeQuery queries.objectLarge '(id: 105)' config.graphql.host user.apitoken}}}</pre>
       </p>
 
+      <hr />
+
+      <h3>
+        <a name="events">Events</a>
+      </h3>
+
+      <p>
+        This will allow you to search events. [MORE DETAILS TO BE ADDED HERE].
+      </p>
+
+      <p>
+        Example:
+      </p>
+
+      <p class="runinexplore">
+        <a href='{{exploreQuery queries.events "(per_page:20, page:0, sort_field: \"beginISODate\", sort: \"asc\")" config.graphql.host}}'>Run in the playground</a>
+      </p>
+      <pre class="query">{{{graphQLQuery queries.events '(per_page:20, page:0, sort_field: "beginISODate", sort: "asc")'}}}</pre>
+
+      <hr />
+
+      <h3>
+        <a name="event">Event</a>
+      </h3>
+
+      <p>
+        This gets you a single event, with the objects in the event. Note, filters will apply to the objects in the event, so you
+        can paginate through and filter objects within an event. [MORE DETAILS TO BE ADDED].
+      </p>
+
+      <p>
+        Example: this will get you the event #421, and the objects in it sorted by title, where there’s a lot of gray, with the results
+        paginated 2 objects at a time, showing the 2nd page
+      </p>
+
+      <p class="runinexplore">
+        <a href='{{exploreQuery queries.event "(id: 421, per_page:2, page:1, color:\"gray\", color_threshold:50.0, sort_field: \"title\", sort: \"asc\")" config.graphql.host}}'>Run in the playground</a>
+      </p>
+      <pre class="query">{{{graphQLQuery queries.event '(id: 421, per_page:2, page:1, color:"gray", color_threshold:50.0, sort_field: "title", sort: "asc")'}}}</pre>
 
       <hr />
 
