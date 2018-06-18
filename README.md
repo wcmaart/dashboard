@@ -129,11 +129,7 @@ When running on a production server things are slightly different. Because the m
 
 The app will attempt to reload at this point. If this fails just restart the app again with `yarn start`
 
-It will now ask you to log in with a screen like this...
-
-![Login](https://raw.githubusercontent.com/wcmaart/tricma/master/media/login.png)
-
-The first user to log in will automatically become the Admin user, so you should probably do this asap :)
+It will now ask you to log in, the first user to log in will automatically become the Admin user, so you should probably do this asap :)
 
 # Configuring and connecting to everything
 
@@ -151,7 +147,7 @@ This is the location of your ElasticSearch instance.
 
 The **Interval in ms** setting is quite important, when the system is up and running we'll be doing things like uploading JSON files with _objects_, _events_ and such like. The dashboard will split those up into individual files for processing and "upserting" to the Elastic Search database. This interval setting is how frequently it'll attempt to look for and "upsert" new items.
 
-See [Speeding up and slowing down data handling](speeding-up-and-slowing-down-data-handling) for more help.
+See [Speeding up and slowing down data handling](#speeding-up-and-slowing-down-data-handling) for more help.
 
 In day to day running we expect there to be one or two new or modified objects and events per day, or even a hundred or so if a lot of new objects are added in one go. The default interval of 20,000ms means the system would upoload 120 new objects in 40 minutes, which is generally fine.
 
@@ -169,7 +165,7 @@ Once you've set up a cloudinary account you should enter the details here.
 
 The system extracts image information for each object from the TMS system. An object will only be "upserted" to Elastic Search once we've checked to see if it has an image and uploaded it to Cloundary if it has one. The speed of uploading images to Cloudinary is the bottleneck to "upserting" all the objects.
 
-See the notes about **Interval in ms** setting in the [Elastic Search](#elastic-search) section above for more details about how you can tune the value to balance rate of upload vs CPU/network processing time. Or see [Speeding up and slowing down data handling](speeding-up-and-slowing-down-data-handling) for more help.
+See the notes about **Interval in ms** setting in the [Elastic Search](#elastic-search) section above for more details about how you can tune the value to balance rate of upload vs CPU/network processing time. Or see [Speeding up and slowing down data handling](#speeding-up-and-slowing-down-data-handling) for more help.
 
 Setting the value too low will get the images uploaded faster but will "thrash" the system. While in developement and inital deploy this may be fine, once everything is running smoothly the value should be set down to a more _relaxed_ value.
 
@@ -240,7 +236,7 @@ Where possible the round-trip tim eto complete the tasks is included, which is u
 
 There are two places where information gets into the system. One is by direct connecton to the TMS system where _some_ information is extracted. Additional information can be supplemented via JSON files, which are uploaded on the "Upload JSON files" page.
 
-![Uploading](https://raw.githubusercontent.com/wcmaart/tricma/master/media/upload.jpg)
+![Uploading](https://raw.githubusercontent.com/wcmaart/tricma/master/media/upload.png)
 
 _Note:_ the code handles JSON being formatted in a specific way and developers should be consulted to make sure the backend can handle a new format.
 
@@ -271,7 +267,7 @@ Clicking on the "Developer" page will show you your API key and links to the sta
 
 The developer documentation details how to call the GraphQL api end points, using your API token. The developers page is where you can find that token.
 
-![developer](https://raw.githubusercontent.com/wcmaart/tricma/master/media/developer.jpg)
+![developer](https://raw.githubusercontent.com/wcmaart/tricma/master/media/developer.png)
 
 TO BE EXPANDED
 
