@@ -18,32 +18,31 @@ This is where the Dashboard fits into the overall architecture of the system, se
   + [Prerequisites](#prerequisites)
   + [Starting in development](#starting-in-development)
   + [Starting in production](#starting-in-production)
-+ [Running for the first time in development](#running-for-the-first-time-in-development)
-+ [Running for the first time in production](#running-for-the-first-time-in-production)
-+ [Configuring and connecting to everything](#configuring-and-connecting-to-everything)
++ [Running for the first time](#running-for-the-first)
   + [Auth0](#auth0)
-  + [TMS systems](#tms-systems)
-  + [ElasticSearch](#elasticsearch)
-  + [Cloudinary](#cloudinary)
++ [Configuring and connecting to everything](#configuring-and-connecting-to-everything)
   + [GraphQL](#graphql)
-+ Admin tools
-  + Managing users
-+ Staff tools
-  + The config page
-  + The stats page
-  + Reading logs
-  + Uploading JSON files
-  + Speeding up and slowing down data handling
-  + Checking system health
-+ 3rd party developer tools
-  + Developer API Token
-  + System status
-  + Documentation
-+ Working with this code for developers
-  + What does this code
-  + Things to look out for
-  + Custom TMS data parsing code
-  + Custom JSON data parsing code
+  + [Elastic Search](#elastic-search)
+  + [TMS systems](#tms-systems)
+  + [Cloudinary](#cloudinary)
++ [Admin tools](#admin-tools)
+  + [Managing users](#managing-users)
+  + [The config page](#the-config-page)
+  + [Speeding up and slowing down data handling](#speeding-up-and-slowing-down-data-handling)
++ [Staff tools](#staff-tools)
+  + [The stats page](#the-stats-page)
+  + [Reading logs](#reading-logs)
+  + [Uploading JSON files](#uploading-json-files)
+  + [Checking system health](#checking-system-health)
++ [3rd party developer tools](#[3rd-party-developer-tools)
+  + [Developer API Token](#developer-api-token)
+  + [System status](#system-status)
+  + [Documentation](#documentation)
++ [Working with this code for developers](#working-with-this-code-for-developers)
+  + [What does this code do](#what-does-this-code-do)
+  + [Things to look out for](#things-to-look-out-for)
+  + [Custom TMS data parsing code](#custom-tms-data-parsing-code)
+  + [Custom JSON data parsing code](#custom-json-data-parsing-code)
 
 # Installation
 
@@ -77,6 +76,7 @@ There are a couple of useful command line parameters you can use...
 
 `--skipOpen` will start the app _without_ trying to open a browser.  
 `--skipBuild` will start the app _without_ running a `yarn install` or rebuilding any of the node or css files.
+`--skipStart` will make it so the app and any code watching doesn't start. Use this when you just want to rebuild the code but not actually start anything.
 
 After your first `yarn start` you should read [Running for the first time in development](#running-for-the-first-time-in-development)
 
@@ -102,55 +102,226 @@ An example of a new "deploy" once you have `PM2` running the dashboard may look 
 If you initially started the app in `PM2` with the skikBuild option i.e. `yarn start --skipBuild` then your deply would need an extra build step in.
 
 1. `git pull`
-2. `yarn build`
+2. `yarn start --skipStart`
 3. `pm2 restart dashboard`
 
+The second method is preferable to take advantage of pm2's hot reloading, as it will rebuild the code before restarting, while in the first method will cause the app to be down for the length of time it takes to build the code.
+
+# Running for the first time
+
+When you run `yarn start` for the first time it will (after installing packages) ask you a few questions about your environment, it will ask you for the port, host and what your `NODE_ENV` should be. Hitting return accepts the defaults of `4002`, `localhost` and `development`. It will look something like this...
+
+![Yarn Start Dev](https://raw.githubusercontent.com/wcmaart/tricma/master/media/yarn_start_dev.png)
+
+### Auth0
+
+A browser will start and ask you for your Auth0 account details. There's more information on the page, but if you've already created your Auth0 account and application you should have your Auth0 domain, client ID and secret.
+
+It will also ask for a **Handshake** value, if you're running development and locally this should already be filled in for you.
+
+![Setup Auth0](https://raw.githubusercontent.com/wcmaart/tricma/master/media/Setup_Auth0.png)
+
+When running on a production server things are slightly different. Because the moment you start it up on a staging/production server it _may_ be open to the world, anyone has access to the form. Only a person with the **handshake** value will be able to successfully submit the form. When starting the app in staging/production mode it will display the handshake on the command line...
+
+![Yarn Start Prod](https://raw.githubusercontent.com/wcmaart/tricma/master/media/yarn_start_prod.png)
+
+...you can also find the handshake value in the `config.json` file that is created.
+
+The app will attempt to reload at this point. If this fails just restart the app again with `yarn start`
+
+It will now ask you to log in with a screen like this...
+
+![Login](https://raw.githubusercontent.com/wcmaart/tricma/master/media/login.png)
+
+The first user to log in will automatically become the Admin user, so you should probably do this asap :)
+
+# Configuring and connecting to everything
+
+Once you have logged in the first thing you need to do is set up connections to _all the things_, heading to the "Config" page will give you a set of forms like this...
+
+![Config page](https://raw.githubusercontent.com/wcmaart/tricma/master/media/config.png)
+
+### GraphQL
+
+This one is optional but not really, letting the dashboard know where the GraphQL is hosted allows it to dynamically create links in the developer documentation. Once you have your GraphQL api endpoint up and running set it up here. Follow the instructions on the [GraphQL repo](https://github.com/wcmaart/api) for details.
+
+### Elastic Search
+
+This is the location of your ElasticSearch instance.
+
+The **Interval in ms** setting is quite important, when the system is up and running we'll be doing things like uploading JSON files with _objects_, _events_ and such like. The dashboard will split those up into individual files for processing and "upserting" to the Elastic Search database. This interval setting is how frequently it'll attempt to look for and "upsert" new items.
+
+See [Speeding up and slowing down data handling](speeding-up-and-slowing-down-data-handling) for more help.
+
+In day to day running we expect there to be one or two new or modified objects and events per day, or even a hundred or so if a lot of new objects are added in one go. The default interval of 20,000ms means the system would upoload 120 new objects in 40 minutes, which is generally fine.
+
+Should you wish to "upsert" objects faster (for example the _first_ time we upload a JSON file), then you can lower the interval down to something much lower. You can check the average time for a round trip "upserting" an object to Elastic Search on the Logs page. The lowest you should set the interval to is 1,000ms higher than the average.
+
+### TMS systems
+
+This is the location and eMuseum key used to connect to your TMS system. When registering a system you should a "short name", this should be unique between TMS systems.
+
+This is becuase we want to unify sources of data from many different places. It's possible that we may have two or more TMS systems and we want to merge the data into one GraphQL api end point. But objects across TMS system may share IDs. The shortname or "stub" allows us to differentiate between objects sharing IDs.
+
+### Cloudinary
+
+Once you've set up a cloudinary account you should enter the details here.
+
+The system extracts image information for each object from the TMS system. An object will only be "upserted" to Elastic Search once we've checked to see if it has an image and uploaded it to Cloundary if it has one. The speed of uploading images to Cloudinary is the bottleneck to "upserting" all the objects.
+
+See the notes about **Interval in ms** setting in the [Elastic Search](#elastic-search) section above for more details about how you can tune the value to balance rate of upload vs CPU/network processing time. Or see [Speeding up and slowing down data handling](speeding-up-and-slowing-down-data-handling) for more help.
+
+Setting the value too low will get the images uploaded faster but will "thrash" the system. While in developement and inital deploy this may be fine, once everything is running smoothly the value should be set down to a more _relaxed_ value.
+
+# Admin tools
+
+This page gives the admin users a set of tools to help manage and run the system. Currently this is limited to managing users. Admin users also get access to [The config page](#the-config-page)
+
+### Managing users
+
+The users page allows you to select users see their creation and last login time, along with their roles. Selecting a user lets you toggle their roles of _Admin_, _Staff_ and _Developer_.
+
+**Admin** users have full access. **Staff** users have access to the Upload JSON and Stats page, so they can upload new objects and see the overall health of the system. **Developers** can see all the developer documentation and the health check pages for the ElasticSearch and GraphQL endpoints.
+
+### Speeding up and slowing down data handling
+
+The system has been designed to break things down into small tasks. For example, it will take a JSON file full of Objects and turn them into individual JSON files. Then it processes these as "small pieces loosly joined" almost like a queueing system.
+
+One tasks may be checking the TMS system for new objects, if it finds them it'll mark them as needing their images uploaded to Cloudinary. While another task will check for new or modified objects that have an image record and updates the ElasticSearch database. While yet another task is asking Cloudinary for color information.
+
+The [config page](#the-config-page) allows an admin user to change the rate at which these tasks run. During normal running of the system these may be set to low values, such as every 20 seconds or every minute. This is on the basis that a handful of new objects may be added daily and it'll take just a few minutes to an hour or two overnight to get everything updated.
+
+The stats page will display estimated times for tasks that need to run, here is an example...
+
+![Stats](https://raw.githubusercontent.com/wcmaart/tricma/master/media/stats.jpg)
+
+Here is is telling us that it's going to take about 4 hours to upload everything. This is because we've set a very low/quick interval time.
+
+A good way to work out what to set an interval to, if you _need_ to speed things up, for example the first time you upload a JSON file, is to let things run for a while and then look at the logs page (see [Reading logs](#reading-logs)). The top of the page gives you a quick breakdown of times, it may look like this...
+
+![Logs](https://raw.githubusercontent.com/wcmaart/tricma/master/media/logs.png)
+
+Which is telling is that on average it's taking 519ms to upload an image to Cloudinary. The lowest we should set our image uploading interval to is 1,000ms higher than the average. In this case a value of 1,500ms seems about right, or one image upload every 1.5 seconds.
+
+Which, a back of a napkin calculations tells us we'll upload about 40 images per minute or 2,400 images per hour. The Stats page told us we had 4,468 images left to upload, at our rate of 2,400 images per hour (1,500ms per image), they should all be uploaded in around 1h48m, or "about 2 hours" as our stats page says.
+
+Once all images have been uploaded then we should set the interval back down to something sensible otherwise it'll keep checking for new images to upload every second and a half, which is unnecessary thrashing of the system.
+
+### The config page
+
+The config page is where connections and time intervals are set up. The sections on this page have already been described above in [GraphQL](#graphql), [Elastic Search](#elastic-search), [TMS systems](#tms-systems) and [Cloudinary](#cloudinary).
 
 
+# Staff tools
 
----
-Everything below here is old markup and should be ignored.
+There are a number of pages that are accessible to the staff role. Most of these are for monitoring the health of the system.
 
-# dashboard
+### The stats page
 
-Dashboard to coordinate the other parts of the wcma api
+![Stats](https://raw.githubusercontent.com/wcmaart/tricma/master/media/stats.jpg)
 
-## Install
+The stats page tells us how many objects the system knows about and how many other tasks it has left to do and how long it will be until those tasks have finished. This is a high level view of what is going on.
 
-These are rough untested notes on how to install the dash board. Please note the dashboard doesn't do anything at the moment other than fire up a web page.
+The top of the page, just under the logout link is a quick at a glance status of the connection to Elastic Search and GraphQL endpoints. Clicking on those will take you to the [system status](#system-status) pages.
 
-Step 1, make sure you have `node` and `yarn` and `git` installed. Then clone this repository. Next type...
+### Reading logs
 
-`yarn start`
+We use the [Winston logger](https://github.com/winstonjs/winston) to log a _whole bunch_ of stuff. Whenever the system attempts to do something it'll make a log of it. If you have access to the server you'll find these in the `logs/tms` folder.
 
-It will ask you some questions about the `port`, `host` and node environment to use (which should be `development`, `staging` or `production`).
+The logs page will however give you a quick overview of the last 100 entries and a further break down into sections.
 
-### Installing and running for development
+Each log is broken down into **Time**, **Action**, **Message** and **ms** (if applicable). _Note:_ there's slightly more information in the actual logs that's not shown on this page, mostly full error message dumps when an error has taken places.
 
-Typing `yarn start` will build everything you need. When in development the application will recompile the `.js` files, `.scss` files and static files in the `public` and `templates` directory, and then restart itself.
+You can also see at a glance the following breakdowns; Images uploaded and images colored are all about image management, while items upserted, events upserted and pages from the TMS looking for new items are all concerned with keeping the objects and events synchronised.
 
-**Note:** because it's restarting itself by spawning a child process if you Ctrl+C or crash out of the app it may leave the process running. The app will attempt to clean up and kill the old process before starting a new one. It will also write out a `.pid` file in the root directory if you need to kill the process by hand (`kill - [pid]`).
+Where possible the round-trip tim eto complete the tasks is included, which is useful for keeping an eye on the overall health of the network and external services.
 
-You should now be able to develop more or less happily.
+### Uploading JSON files
 
-### Installing and running for production
+There are two places where information gets into the system. One is by direct connecton to the TMS system where _some_ information is extracted. Additional information can be supplemented via JSON files, which are uploaded on the "Upload JSON files" page.
 
-If you are on the machine you are installing to, which you probably will be as you'll want to set up `pm2` or `forever` or something, you can run `yarn start` and it will ask you the host, port and environment questions. You can also start the app with...
+![Uploading](https://raw.githubusercontent.com/wcmaart/tricma/master/media/upload.jpg)
 
-`yarn start --port 4002 --host localhost --env production`
+_Note:_ the code handles JSON being formatted in a specific way and developers should be consulted to make sure the backend can handle a new format.
 
-Or whichever port you want to run it on.
+When a JSON file is uploaded it is split into separate entities which are queued for upserting to the database. Only entities that are new or have been modified since the last time they were seen are queued this way. Therefor you can upload full JSON files and not worry about uploading duplicates.
 
-This will write out a new `.env` file each time, you shouldn't add anything else to the `.env` file as it'll be over written. The app will guide you through adding extra settings information to the `config.json` file instead.
+When a JSON file upload is complete it will show you all the unique fields it found including any new ones, you can use this information to check against any schemas you're using for GraphQL queries as well as checking them against your expections.
 
-**Note:** there is no `config.json` file yet! :)
+These fields are also outputted into the following files...
 
-As you deploy new code, you just need to get the new code then restart the app running `yarn start` and it will automatically rebuild all the files you need.
+```
+data/events/[tms stub]/eventFields.json
+data/tms/[tms stub]/objectFields.json
+```
 
-_In theory_
+### Checking system health
 
-Better still, install `pm2` and just tell it to restart the app whenever changes are pushed/pulled to the server.
+TO BE ADDED
 
-I am now about to test all this!
+# 3rd party developer tools
 
----
+TO BE ADDED
+
+(basically, 3rd party developers can sign up and then they can see their API token, system status and developer documention)
+
+### Developer API Token
+
+Clicking on the "Developer" page will show you your API key and links to the status pages and developer documentation.
+
+The developer documentation details how to call the GraphQL api end points, using your API token. The developers page is where you can find that token.
+
+![developer](https://raw.githubusercontent.com/wcmaart/tricma/master/media/developer.jpg)
+
+TO BE EXPANDED
+
+### System status
+
+A developer can get a general over view of how the GraphQL api endpoint is doing by clicking the "GraphQL Status" link, this takes the user to a page showing ping times for the last 20 minutes. If the server restarts then this list will be cleared and updated once a minute.
+
+The developer can also get to this page by clicking the "GraphQL: [status]" link in the top sub-navigation bar, along with the Elastic Search status.
+
+### Documentation
+
+Developer documention can be found here, including example code...
+
+TO BE EXPANDED
+
+# Working with this code for developers
+
+TO BE EXPANDED
+
+_Quick notes about the code:_ essentially this code is 10% scripts, 30% error checking on those scripts and 60% UI webpages to make it easy(ier) for none technical users to use the system and see what's going on.
+
+The aim of the system is essence to...
+
+1. Connect to the TMS system and extract information
+2. Parse JSON files to extract information
+3. Put the information into a data store
+4. Upload images somewhere
+
+This is completed by the core 10% scripts that are detailed in the following sections.
+
+The 30% code is making sure those scripts run and don't fall over should they encounter something expected and a logging system to record everything it's trying to do.
+
+The 60% UI webpages is reporting on the tasks and logs and letting users configure certain settings, basically a front-end to updating a `config.json` file. And then all the error checking on the user submitted information.
+
+In short, yes you could boil all this down into some simple scripts, but no, that's not what this app is trying to do.
+
+TO BE EXPANDED
+
+### What does this code do
+
+TO BE EXPANDED
+
+### Things to look out for
+
+TO BE EXPANDED
+
+### Custom TMS data parsing code
+
+TO BE EXPANDED
+
+### Custom JSON data parsing code
+
+TO BE EXPANDED
