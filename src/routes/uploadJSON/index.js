@@ -65,6 +65,10 @@ exports.getfile = (req, res) => {
     if ('eventsJSON' in files) {
       processEventsJSON(req, res, tms, files.eventsJSON.path)
     }
+
+    if ('exhibitionsJSON' in files) {
+      processExhibitionsJSON(req, res, tms, files.exhibitionsJSON.path)
+    }
   })
 }
 
@@ -378,5 +382,167 @@ const processEventsJSON = (req, res, tms, filename) => {
   req.templateValues.newEvents = newEvents
   req.templateValues.modifiedEvents = modifiedEvents
   req.templateValues.totalEvents = totalEvents
+  return res.render('uploadJSON/results', req.templateValues)
+}
+
+const processExhibitionsJSON = (req, res, tms, filename) => {
+  //  TODO: Check what type of XML file we have been passed, we will do this
+  //  based on the 'action' field. And will then validate (as best we can)
+  //  the contents of the file based on what we've been passed
+  let newExhibitions = 0
+  let modifiedExhibitions = 0
+  let totalExhibitions = 0
+  const startTime = new Date().getTime()
+  const tmsLogger = logging.getTMSLogger()
+
+  const objectsRAW = fs.readFileSync(filename, 'utf-8')
+  //  Add try catch here
+  let exhibitionsJSON = null
+  try {
+    exhibitionsJSON = JSON.parse(objectsRAW)
+  } catch (er) {
+    req.templateValues.error = {
+      msg: 'Sorry, we failed to parse that JSON file, please try again.'
+    }
+    tmsLogger.object(`Failed to parse that JSON file tms ${tms}`, {
+      action: 'error',
+      stub: tms
+    })
+    return res.render('uploadJSON/results', req.templateValues)
+  }
+
+  tmsLogger.object(`New exhibitionsJSON uploaded for tms ${tms}`, {
+    action: 'upload',
+    stub: tms
+  })
+
+  /* ##########################################################################
+
+  This is where the PROCESSING STARTS
+
+  ########################################################################## */
+  if (!fs.existsSync(path.join(rootDir, 'exhibitions'))) fs.mkdirSync(path.join(rootDir, 'exhibitions'))
+  if (!fs.existsSync(path.join(rootDir, 'exhibitions', tms))) fs.mkdirSync(path.join(rootDir, 'exhibitions', tms))
+
+  //  In theory we now have a valid(ish) objects file. Let's go through
+  //  it now and work out how many objects are new or modified
+  exhibitionsJSON.forEach((exhibition) => {
+    totalExhibitions += 1
+    const id = parseInt(exhibition.ExhibitionID, 10)
+    const subFolder = String(Math.floor(id / 1000) * 1000)
+    const filename = path.join(rootDir, 'exhibitions', tms, 'processed', subFolder, `${id}.json`)
+
+    //  Turn the ExhObjXrefs field into an array
+    exhibition.ExhObjXrefs = exhibition.ExhObjXrefs.map((object) => {
+      return parseInt(object.ObjectID, 10)
+    })
+    exhibition.ExhObjXrefs = exhibition.ExhObjXrefs.filter((object) => {
+      return !isNaN(object)
+    })
+
+    //  See if the files exists in processed, if it doesn't then it's a new file
+    let needToUpload = false
+    if (!fs.existsSync(filename)) {
+      tmsLogger.object(`Creating process file for exhibition ${id} for ${tms}`, {
+        action: 'new',
+        id: id,
+        stub: tms
+      })
+      newExhibitions += 1
+      needToUpload = true
+    } else {
+      //  We need to read in the file and compare to see if it's different
+      const processedFileRaw = fs.readFileSync(filename, 'utf-8')
+      const processedFile = JSON.stringify(JSON.parse(processedFileRaw))
+      const thisObject = JSON.stringify(exhibition)
+      //  If there's a difference between the objects then we know it's been modified
+      //  and we need to upload it.
+      if (thisObject !== processedFile) {
+        needToUpload = true
+        modifiedExhibitions += 1
+        //  Remove it from the processed fold, to force us to reupload it
+        fs.unlinkSync(filename)
+        tmsLogger.object(`Found changed exhibition JSON for object ${id} for ${tms}`, {
+          action: 'modified',
+          id: id,
+          stub: tms
+        })
+      }
+    }
+
+    //  If we need to upload the file then pop it into the process folder
+    if (needToUpload === true) {
+      if (!fs.existsSync(path.join(rootDir, 'exhibitions', tms, 'process'))) {
+        fs.mkdirSync(path.join(rootDir, 'exhibitions', tms, 'process'))
+      }
+      if (!fs.existsSync(path.join(rootDir, 'exhibitions', tms, 'process', subFolder))) {
+        fs.mkdirSync(path.join(rootDir, 'exhibitions', tms, 'process', subFolder))
+      }
+      const newFilename = path.join(rootDir, 'exhibitions', tms, 'process', subFolder, `${id}.json`)
+      const processedFileJSONPretty = JSON.stringify(exhibition, null, 4)
+      fs.writeFileSync(newFilename, processedFileJSONPretty, 'utf-8')
+    }
+  })
+
+  /* ##########################################################################
+
+  This is where the PROCESSING ENDS
+
+  ########################################################################## */
+
+  //  As a seperate thing, I want to see all the fields that exist
+  //  and let us know if we've found any new ones
+
+  //  Check to see if we already have a file containing all the fields, if so read it in
+  let exhibitionsFields = []
+
+  const exhibitionsFieldsFilename = path.join(rootDir, 'exhibitions', tms, 'exhibitionsFields.json')
+  if (fs.existsSync(exhibitionsFieldsFilename)) {
+    exhibitionsFields = fs.readFileSync(exhibitionsFieldsFilename, 'utf-8')
+    exhibitionsFields = JSON.parse(exhibitionsFields)
+  }
+  const exhibitionsFieldsMap = {}
+
+  //  Now go through all the objects looking at all the keys
+  //  checking to see if we already have a record of them, if so
+  //  mark them as new
+  exhibitionsJSON.forEach((exhibition) => {
+    Object.keys(exhibition).forEach((key) => {
+      //  If we don't have a record, then add it to the fields
+      if (!exhibitionsFields.includes(key)) {
+        exhibitionsFields.push(key)
+        //  If we don't already have it in the fields, then it's
+        //  all new
+        if (!(key in exhibitionsFieldsMap)) {
+          exhibitionsFieldsMap[key] = true
+        }
+      } else {
+        //  If we don't have it, then we need to add it to the map
+        //  but it's not new as it already exists in the array
+        if (!(key in exhibitionsFieldsMap)) {
+          exhibitionsFieldsMap[key] = false
+        }
+      }
+    })
+  })
+
+  //  Now write the fields back out so we can compare against them next time
+  const exhibitionsFieldsJSONPretty = JSON.stringify(exhibitionsFields, null, 4)
+  fs.writeFileSync(exhibitionsFieldsFilename, exhibitionsFieldsJSONPretty, 'utf-8')
+  req.templateValues.fields = exhibitionsFieldsMap
+
+  const endTime = new Date().getTime()
+  tmsLogger.object(`Finished uploading exhibition JSON file for object ${tms}`, {
+    action: 'finished',
+    stub: tms,
+    newExhibitions,
+    modifiedExhibitions,
+    totalExhibitions,
+    ms: endTime - startTime
+  })
+  req.templateValues.type = 'exhibitions'
+  req.templateValues.newExhibitions = newExhibitions
+  req.templateValues.modifiedExhibitions = modifiedExhibitions
+  req.templateValues.totalExhibitions = totalExhibitions
   return res.render('uploadJSON/results', req.templateValues)
 }
