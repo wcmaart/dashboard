@@ -191,8 +191,7 @@ const getImageForEvent = (tms, id) => {
   let remote = null
   const tmsDir = path.join(rootDir, 'tms')
   const perfectDir = path.join(tmsDir, tms, 'perfect')
-
-  if (remote === null) {
+  if (!isNaN(id)) {
     const subFolder = String(Math.floor(id / 1000) * 1000)
     const perfectFilename = path.join(perfectDir, subFolder, `${id}.json`)
     if (fs.existsSync(perfectFilename)) {
@@ -388,8 +387,24 @@ const upsertEvent = async (stub, id) => {
   const upsertEvent = processFile
   upsertEvent.source = stub
 
+  //  Convert some strings to numbers
+  upsertEvent.eventId = parseInt(upsertEvent.eventId, 10)
+  upsertEvent.courseNbr = parseInt(upsertEvent.courseNbr, 10)
+  upsertEvent.startYear = parseInt(upsertEvent.evenstartYeartId, 10)
+  upsertEvent.startMonth = parseInt(upsertEvent.startMonth, 10)
+  upsertEvent.startDay = parseInt(upsertEvent.startDay, 10)
+  upsertEvent.objectID = parseInt(upsertEvent.objectID, 10)
+
+  if (isNaN(upsertEvent.courseNbr)) upsertEvent.courseNbr = null
+  if (isNaN(upsertEvent.startYear)) upsertEvent.startYear = null
+  if (isNaN(upsertEvent.startMonth)) upsertEvent.startMonth = null
+  if (isNaN(upsertEvent.startDay)) upsertEvent.startDay = null
+  upsertEvent.startDateDate = null
+  try {
+    upsertEvent.startDateDate = new Date(upsertEvent.startDate)
+  } catch (er) {}
+
   //  Go and get a key image for the event
-  //  TODO
   const keyImage = getImageForEvent(stub, parseInt(upsertEvent.objectID, 10))
   if (keyImage !== null) {
     upsertEvent.keyImage = keyImage

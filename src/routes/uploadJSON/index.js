@@ -266,17 +266,9 @@ const processEventsJSON = (req, res, tms, filename) => {
   //  it now and work out how many objects are new or modified
   eventsJSON.forEach((event) => {
     totalEvents += 1
-    const id = parseInt(event.ExhibitionID, 10)
+    const id = parseInt(event.eventId, 10)
     const subFolder = String(Math.floor(id / 1000) * 1000)
     const filename = path.join(rootDir, 'events', tms, 'processed', subFolder, `${id}.json`)
-
-    //  Turn the ExhObjXrefs field into an array
-    event.ExhObjXrefs = event.ExhObjXrefs.map((object) => {
-      return parseInt(object.ObjectID, 10)
-    })
-    event.ExhObjXrefs = event.ExhObjXrefs.filter((object) => {
-      return !isNaN(object)
-    })
 
     //  See if the files exists in processed, if it doesn't then it's a new file
     let needToUpload = false
