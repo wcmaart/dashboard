@@ -62,10 +62,10 @@
                 <a href="#object">Object</a>
               </li>
               <li>
-                <a href="#events">Events</a>
+                <a href="#exhibitions">Exhibitions</a>
               </li>
               <li>
-                <a href="#event">event</a>
+                <a href="#exhibition">exhibition</a>
               </li>
               <li>
                 <a href="#object_names">object_names (Object Type)</a>
@@ -452,11 +452,11 @@
       <hr />
 
       <h3>
-        <a name="events">Events</a>
+        <a name="exhibitions">Exhibitions</a>
       </h3>
 
       <p>
-        This will allow you to search events. [MORE DETAILS TO BE ADDED HERE].
+        This will allow you to search exhibitions. [MORE DETAILS TO BE ADDED HERE].
       </p>
 
       <p>
@@ -464,30 +464,30 @@
       </p>
 
       <p class="runinexplore">
-        <a href='{{exploreQuery queries.events "(per_page:20, page:0, sort_field: \"beginISODate\", sort: \"asc\")" config.graphql.host}}'>Run in the playground</a>
+        <a href='{{exploreQuery queries.exhibitions "(per_page:20, page:0, sort_field: \"beginISODate\", sort: \"asc\")" config.graphql.host}}'>Run in the playground</a>
       </p>
-      <pre class="query">{{{graphQLQuery queries.events '(per_page:20, page:0, sort_field: "beginISODate", sort: "asc")'}}}</pre>
+      <pre class="query">{{{graphQLQuery queries.exhibitions '(per_page:20, page:0, sort_field: "beginISODate", sort: "asc")'}}}</pre>
 
       <hr />
 
       <h3>
-        <a name="event">Event</a>
+        <a name="exhibition">Exhibition</a>
       </h3>
 
       <p>
-        This gets you a single event, with the objects in the event. Note, filters will apply to the objects in the event, so you
-        can paginate through and filter objects within an event. [MORE DETAILS TO BE ADDED].
+        This gets you a single exhibition, with the objects in the exhibition. Note, filters will apply to the objects in the exhibition,
+        so you can paginate through and filter objects within an exhibition. [MORE DETAILS TO BE ADDED].
       </p>
 
       <p>
-        Example: this will get you the event #421, and the objects in it sorted by title, where there’s a lot of gray, with the results
-        paginated 2 objects at a time, showing the 2nd page
+        Example: this will get you the exhibition #421, and the objects in it sorted by title, where there’s a lot of gray, with
+        the results paginated 2 objects at a time, showing the 2nd page
       </p>
 
       <p class="runinexplore">
-        <a href='{{exploreQuery queries.event "(id: 421, per_page:2, page:1, color:\"gray\", color_threshold:50.0, sort_field: \"title\", sort: \"asc\")" config.graphql.host}}'>Run in the playground</a>
+        <a href='{{exploreQuery queries.exhibition "(id: 421, per_page:2, page:1, color:\"gray\", color_threshold:50.0, sort_field: \"title\", sort: \"asc\")" config.graphql.host}}'>Run in the playground</a>
       </p>
-      <pre class="query">{{{graphQLQuery queries.event '(id: 421, per_page:2, page:1, color:"gray", color_threshold:50.0, sort_field: "title", sort: "asc")'}}}</pre>
+      <pre class="query">{{{graphQLQuery queries.exhibition '(id: 421, per_page:2, page:1, color:"gray", color_threshold:50.0, sort_field: "title", sort: "asc")'}}}</pre>
 
       <hr />
 

@@ -63,7 +63,56 @@
         You should be able to track the progress of new uploaded via the
         <a href="/stats">Stats</a> page.
       </p>
-      {{/if}} {{else}}
+      {{/if}} {{/ifEqual}} {{#ifEqual type 'exhibitions'}}
+      <h2>Exhibitions JSON</h2>
+      {{#if ../error}}
+      <p>
+        You have just tried to upload an exhibitions file, it failed with the following error...
+      </p>
+      <p>
+        {{../../error.msg}}
+      </p>
+      {{else}}
+      <p>
+        You have just uploaded an exhibitions file...
+      </p>
+
+      <p>
+        <table>
+          <tr>
+            <td style="width: 20%">Total exhibitions</td>
+            <td>{{../../totalExhibitions}}</td>
+          </tr>
+          <tr>
+            <td>New exhibitions</td>
+            <td>{{../../newExhibitions}}</td>
+          </tr>
+          <tr>
+            <td>Modified exhibitions</td>
+            <td>{{../../modifiedExhibitions}}</td>
+          </tr>
+        </table>
+      </p>
+      {{#if ../../fields}}
+      <p>
+        These are the fields contained in all the exhibitions...
+      </p>
+      <p>
+        <table>
+          {{#each ../../fields}}
+          <tr>
+            <td style="width: 20%">{{@key}}</td>
+            <td>{{#if @this}}New!{{else}}&nbsp;{{/if}}</td>
+          </tr>
+          {{/each}}
+        </table>
+      </p>
+      {{/if}}
+      <p>
+        You should be able to track the progress of new uploaded via the
+        <a href="/stats">Stats</a> page.
+      </p>
+      {{/if}} {{/ifEqual}} {{#ifEqual type 'events'}}
       <h2>Events JSON</h2>
       {{#if ../error}}
       <p>

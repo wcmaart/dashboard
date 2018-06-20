@@ -107,6 +107,28 @@ exports.index = (req, res) => {
       }
       thisTMS.timeToUpsertEvents = new Date().getTime() + timeToUpsertEvents
 
+      //  Now we are doing roughly the same with the exhibitions
+      let exhibitionsWaitingToBeProcessed = 0
+      const processExhibitionsDir = path.join(rootDir, 'exhibitions', tms.stub, 'process')
+      if (fs.existsSync(processExhibitionsDir)) {
+        const subFolders = fs.readdirSync(processExhibitionsDir)
+        subFolders.forEach((subFolder) => {
+          const jsonFiles = fs.readdirSync(path.join(processExhibitionsDir, subFolder)).filter((file) => {
+            const filesSplit = file.split('.')
+            if (filesSplit.length !== 2) return false
+            if (filesSplit[1] !== 'json') return false
+            return true
+          })
+          exhibitionsWaitingToBeProcessed += jsonFiles.length
+        })
+      }
+      thisTMS.exhibitionsWaitingToBeProcessed = exhibitionsWaitingToBeProcessed
+      let timeToUpsertExhibitions = exhibitionsWaitingToBeProcessed * 20000 // (20,000 ms is the default time between uploading)
+      if (timers !== null && 'elasticsearch' in timers) {
+        timeToUpsertExhibitions = exhibitionsWaitingToBeProcessed * parseInt(timers.elasticsearch, 10)
+      }
+      thisTMS.timeToUpsertExhibitions = new Date().getTime() + timeToUpsertExhibitions
+
       const endTime = new Date().getTime()
       thisTMS.ms = endTime - startTime
       newTMS.push(thisTMS)
@@ -140,6 +162,7 @@ exports.logs = (req, res) => {
   const last100PagesReceived = []
   const last100ItemsUpserted = []
   const last100EventsUpserted = []
+  const last100ExhibitionsUpserted = []
   const last100ImagesColored = []
 
   const lr = new LineByLineReader(path.join(rootDir, lastLog))
@@ -188,6 +211,14 @@ exports.logs = (req, res) => {
       last100EventsUpserted.push(logEntry)
       if (last100EventsUpserted.length > 100) {
         last100EventsUpserted.shift()
+      }
+    }
+
+    //  And the upserted exhibitions
+    if ('action' in data && data.action === 'upsertedExhibition') {
+      last100ExhibitionsUpserted.push(logEntry)
+      if (last100ExhibitionsUpserted.length > 100) {
+        last100ExhibitionsUpserted.shift()
       }
     }
 
@@ -249,6 +280,18 @@ exports.logs = (req, res) => {
       req.templateValues.averageEventsUpsertedms = 0
     }
     req.templateValues.last100EventsUpserted = last100EventsUpserted.reverse()
+
+    //  Get the total ms spent uploading the images
+    const exhibitionsUpsertedms = last100ExhibitionsUpserted.map((record) => {
+      return parseInt(record.data.ms, 10)
+    })
+    //  Get the average time to upsert an exhibition
+    if (exhibitionsUpsertedms.length > 0) {
+      req.templateValues.averageExhibitionsUpsertedms = Math.floor(exhibitionsUpsertedms.reduce((p, c) => p + c, 0) / exhibitionsUpsertedms.length)
+    } else {
+      req.templateValues.averageExhibitionsUpsertedms = 0
+    }
+    req.templateValues.last100ExhibitionsUpserted = last100ExhibitionsUpserted.reverse()
 
     //  Get the total ms spent uploading the images
     const itemsColoredms = last100ImagesColored.map((record) => {

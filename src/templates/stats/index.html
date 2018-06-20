@@ -82,6 +82,19 @@
           <td colspan="2">&nbsp;</td>
         </tr>
         <tr>
+          <td style="vertical-align: top">Exhibitions remaining</td>
+          <td>{{prettyNumber exhibitionsWaitingToBeProcessed}} (Finishes {{timeAgo timeToUpsertExhibitions}}, estimate) {{#if
+            ../user.roles.isAdmin}}
+            <small>
+              <br /> *If you have a lot of files to upload, you can adjust this time in the
+              <a href="/config#elasticsearch">ElasticSearch section</a> of the config page.</small>
+            {{/if}}
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">&nbsp;</td>
+        </tr>
+        <tr>
           <td>Results generated in</td>
           <td>{{prettyNumber ms}}ms</td>
         </tr>
