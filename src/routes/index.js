@@ -102,7 +102,7 @@ router.use(function (req, res, next) {
 
 router.get('/', main.index)
 router.get('/admin', ensureLoggedIn, admin.index)
-router.get('/admin/blow/away/index/:index', ensureLoggedIn, admin.blowaway)
+router.post('/admin/blow/away/index/:index', ensureLoggedIn, admin.blowaway)
 router.get('/admin/users', ensureLoggedIn, admin.users)
 router.get('/admin/user/:id', ensureLoggedIn, admin.user)
 router.post('/admin/user/:id', ensureLoggedIn, admin.user)
