@@ -414,6 +414,11 @@ const upsertEvent = async (stub, id) => {
     delete upsertEvent.startDate
   }
 
+  upsertEvent.description = upsertEvent.Description
+  delete upsertEvent.Description
+  upsertEvent.subjectAndCourse = upsertEvent.subjectAndCourse.trim()
+  upsertEvent.subject = upsertEvent.subject.trim()
+
   //  Go and get a key image for the event
   const keyImage = getImageForEvent(stub, parseInt(upsertEvent.objectID, 10))
   if (keyImage !== null) {
