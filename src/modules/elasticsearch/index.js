@@ -404,6 +404,16 @@ const upsertEvent = async (stub, id) => {
     upsertEvent.startDateDate = new Date(upsertEvent.startDate)
   } catch (er) {}
 
+  const d = upsertEvent.startDateDate
+  if ((d instanceof Date && !isNaN(d)) === false) {
+    delete upsertEvent.startDateDate
+  }
+
+  const sd = upsertEvent.startDate
+  if ((sd instanceof Date && !isNaN(sd)) === false) {
+    delete upsertEvent.startDate
+  }
+
   //  Go and get a key image for the event
   const keyImage = getImageForEvent(stub, parseInt(upsertEvent.objectID, 10))
   if (keyImage !== null) {
