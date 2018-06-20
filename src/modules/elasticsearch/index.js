@@ -390,7 +390,7 @@ const upsertEvent = async (stub, id) => {
   //  Convert some strings to numbers
   upsertEvent.eventId = parseInt(upsertEvent.eventId, 10)
   upsertEvent.courseNbr = parseInt(upsertEvent.courseNbr, 10)
-  upsertEvent.startYear = parseInt(upsertEvent.evenstartYeartId, 10)
+  upsertEvent.startYear = parseInt(upsertEvent.startYear, 10)
   upsertEvent.startMonth = parseInt(upsertEvent.startMonth, 10)
   upsertEvent.startDay = parseInt(upsertEvent.startDay, 10)
   upsertEvent.objectID = parseInt(upsertEvent.objectID, 10)
