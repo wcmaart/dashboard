@@ -160,7 +160,7 @@ class Queries {
       height
       format
     }
-    events {
+    exhibitions {
       id
       title
       planningNotes
@@ -185,8 +185,8 @@ class Queries {
   }
 }`
 
-    this.events = `query {
-  events[[]] {
+    this.exhibitions = `query {
+  exhibitions[[]] {
     id
     title
     planningNotes
@@ -210,8 +210,8 @@ class Queries {
   }
 }`
 
-    this.event = `query {
-  event[[]] {
+    this.exhibition = `query {
+  exhibition[[]] {
     id
     title
     planningNotes
