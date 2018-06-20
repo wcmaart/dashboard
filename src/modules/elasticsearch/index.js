@@ -166,7 +166,7 @@ const checkItems = () => {
   }
 }
 
-const getImageForEvent = (tms, ids) => {
+const getImageForExhibition = (tms, ids) => {
   let remote = null
   const tmsDir = path.join(rootDir, 'tms')
   const perfectDir = path.join(tmsDir, tms, 'perfect')
@@ -185,6 +185,175 @@ const getImageForEvent = (tms, ids) => {
     }
   })
   return remote
+}
+
+const getImageForEvent = (tms, id) => {
+  let remote = null
+  const tmsDir = path.join(rootDir, 'tms')
+  const perfectDir = path.join(tmsDir, tms, 'perfect')
+
+  if (remote === null) {
+    const subFolder = String(Math.floor(id / 1000) * 1000)
+    const perfectFilename = path.join(perfectDir, subFolder, `${id}.json`)
+    if (fs.existsSync(perfectFilename)) {
+      const perfectObjectRaw = fs.readFileSync(perfectFilename, 'utf-8')
+      const perfectObject = JSON.parse(perfectObjectRaw)
+      if ('remote' in perfectObject && perfectObject.remote !== null && 'status' in perfectObject.remote && perfectObject.remote.status === 'ok') {
+        remote = perfectObject.remote
+      }
+    }
+  }
+
+  return remote
+}
+
+/**
+ * This method tries to grab a record of an object that has an image that needs
+ * uploading and has a go at uploading, if it manages it then it puts the resulting
+ * information back into the perfect file, otherwise it needs to mark it as failed
+ * somehow
+ * @param {String} stub The name of the TMS folder we are going to look in
+ * @param {String} id The id of the object we want to upsert
+ */
+const upsertExhibition = async (stub, id) => {
+  const tmsLogger = logging.getTMSLogger()
+
+  //  Check to see that we have elasticsearch configured
+  const config = new Config()
+  const elasticsearchConfig = config.get('elasticsearch')
+  //  If there's no elasticsearch configured then we don't bother
+  //  to do anything
+  if (elasticsearchConfig === null) {
+    return
+  }
+
+  //  Check to make sure the file exists
+  const subFolder = String(Math.floor(id / 1000) * 1000)
+  const processFilename = path.join(rootDir, 'exhibitions', stub, 'process', subFolder, `${id}.json`)
+  if (!fs.existsSync(processFilename)) return
+
+  //  Read in the processFile
+  const processFileRaw = fs.readFileSync(processFilename, 'utf-8')
+  const processFile = JSON.parse(processFileRaw)
+
+  const upsertExhibition = processFile
+  upsertExhibition.source = stub
+
+  //  Go and get a key image for the exhibition
+  const keyImage = getImageForExhibition(stub, upsertExhibition.ExhObjXrefs)
+  if (keyImage !== null) {
+    upsertExhibition.keyImage = keyImage
+  }
+
+  const esclient = new elasticsearch.Client(elasticsearchConfig)
+  const startTime = new Date().getTime()
+
+  //  Create the index if we need to
+  const index = 'exhibitions_wcma'
+  const type = 'exhibition'
+  const exists = await esclient.indices.exists({
+    index
+  })
+  if (exists === false) {
+    await esclient.indices.create({
+      index
+    })
+  }
+
+  //  Upsert the item
+  esclient.update({
+    index,
+    type,
+    id,
+    body: {
+      doc: upsertExhibition,
+      doc_as_upsert: true
+    }
+  }).then(() => {
+    //  Move it from the process to the processed folder
+    const processedDir = path.join(rootDir, 'exhibitions', stub, 'processed')
+    if (!fs.existsSync(processedDir)) {
+      fs.mkdirSync(processedDir)
+    }
+    if (!fs.existsSync(path.join(processedDir, subFolder))) {
+      fs.mkdirSync(path.join(processedDir, subFolder))
+    }
+    const processedFilename = path.join(processedDir, subFolder, `${id}.json`)
+    fs.renameSync(processFilename, processedFilename)
+    const endTime = new Date().getTime()
+    tmsLogger.object(`Upserted item for exhibition ${id} for ${stub}`, {
+      action: 'upsertedExhibition',
+      id: id,
+      stub: stub,
+      ms: endTime - startTime
+    })
+  })
+}
+
+/**
+ * All this method does is look through _all_ the tms "process" folders
+ * looking for the first record it finds where we have an image source
+ * defined in the perfect version of it, or the image source is null
+ * @private
+ */
+const checkExhibitions = () => {
+  const config = new Config()
+  const elasticsearchConfig = config.get('elasticsearch')
+  const tmsLogger = logging.getTMSLogger()
+
+  //  If there's no elasticsearch configured then we don't bother
+  //  to do anything
+  if (elasticsearchConfig === null) {
+    tmsLogger.object(`No elasticsearch configured`, {
+      action: 'checkingEventsProcess'
+    })
+    return
+  }
+
+  //  Only carry on if we have a data and tms directory
+  if (!fs.existsSync(rootDir) || !fs.existsSync(path.join(rootDir, 'exhibitions'))) {
+    tmsLogger.object(`No data or data/exhibitions found`, {
+      action: 'checkingExhibitionsProcess'
+    })
+    return
+  }
+
+  //  Now we need to look through all the folders in the tms/[something]/perfect/[number]
+  //  folder looking for one that has an image that needs uploading, but hasn't been uploaded
+  //  yet.
+  let foundExhibitionsToUpload = false
+  const tmsses = fs.readdirSync(path.join(rootDir, 'exhibitions'))
+  tmsLogger.object(`Checking for a new exhibitions to upsert`, {
+    action: 'checkingExhibitionsProcess'
+  })
+  tmsses.forEach((tms) => {
+    if (foundExhibitionsToUpload === true) return
+    //  Check to see if a 'process' directory exists
+    const tmsDir = path.join(rootDir, 'exhibitions', tms, 'process')
+    if (fs.existsSync(tmsDir)) {
+      if (foundExhibitionsToUpload === true) return
+      const subFolders = fs.readdirSync(tmsDir)
+      subFolders.forEach((subFolder) => {
+        if (foundExhibitionsToUpload === true) return
+        const files = fs.readdirSync(path.join(tmsDir, subFolder)).filter(file => {
+          const fileFragments = file.split('.')
+          if (fileFragments.length !== 2) return false
+          if (fileFragments[1] !== 'json') return false
+          return true
+        })
+        files.forEach((file) => {
+          if (foundExhibitionsToUpload === true) return
+          foundExhibitionsToUpload = true
+          upsertExhibition(tms, file.split('.')[0])
+        })
+      })
+    }
+  })
+  if (foundExhibitionsToUpload === false) {
+    tmsLogger.object(`No new exhibitions found to upsert`, {
+      action: 'checkingExhibitionProcess'
+    })
+  }
 }
 
 /**
@@ -220,7 +389,8 @@ const upsertEvent = async (stub, id) => {
   upsertEvent.source = stub
 
   //  Go and get a key image for the event
-  const keyImage = getImageForEvent(stub, upsertEvent.ExhObjXrefs)
+  //  TODO
+  const keyImage = getImageForEvent(stub, parseInt(upsertEvent.objectID, 10))
   if (keyImage !== null) {
     upsertEvent.keyImage = keyImage
   }
@@ -372,4 +542,23 @@ exports.startUpsertingEvents = () => {
     checkEvents()
   }, interval)
   checkEvents()
+}
+
+exports.startUpsertingExhibitions = () => {
+  //  Remove the old interval timer
+  clearInterval(global.elasticsearchExhibitionsTmr)
+
+  //  See if we have an interval timer setting in the
+  //  timers part of the config, if not use the default
+  //  of 20,000 (20 seconds)
+  const config = new Config()
+  const timers = config.get('timers')
+  let interval = 20000
+  if (timers !== null && 'elasticsearch' in timers) {
+    interval = parseInt(timers.elasticsearch, 10)
+  }
+  global.elasticsearchExhibitionsTmr = setInterval(() => {
+    checkExhibitions()
+  }, interval)
+  checkExhibitions()
 }
