@@ -8,6 +8,18 @@ exports.index = (req, res) => {
     return res.redirect('/')
   }
 
+  if ('action' in req.body && req.body.action === 'search') {
+    if ('tms' in req.body && 'objectID' in req.body && req.body.objectID !== '') {
+      return res.redirect(`/search/object/${req.body.tms}/${req.body.objectID}`)
+    }
+    if ('tms' in req.body && 'eventID' in req.body && req.body.eventID !== '') {
+      return res.redirect(`/search/event/${req.body.tms}/${req.body.eventID}`)
+    }
+    if ('tms' in req.body && 'exhibitionID' in req.body && req.body.exhibitionID !== '') {
+      return res.redirect(`/search/exhibition/${req.body.tms}/${req.body.exhibitionID}`)
+    }
+  }
+
   //  Just for fun we are going to find out how many perfect records we
   //  have for each TMS system, see how many have images and how many
   //  images have been uploaded

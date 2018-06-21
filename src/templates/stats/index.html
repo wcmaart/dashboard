@@ -107,6 +107,58 @@
           <td>{{prettyNumber ms}}ms</td>
         </tr>
       </table>
+
+      <p>
+        <form method="post">
+          <table class="api">
+            <tr>
+              <td style="width: 20%">Search object by id:</td>
+              <td>
+                <input type="text" name="objectID">
+              </td>
+              <td>
+                <input type="hidden" name="tms" value="{{stub}}">
+                <button type="submit" value="search" name="action">Go</button>
+              </td>
+            </tr>
+          </table>
+        </form>
+      </p>
+
+      <p>
+        <form method="post">
+          <table class="api">
+            <tr>
+              <td style="width: 20%">Search event by id:</td>
+              <td>
+                <input type="text" name="eventID">
+              </td>
+              <td>
+                <input type="hidden" name="tms" value="{{stub}}">
+                <button type="submit" value="search" name="action">Go</button>
+              </td>
+            </tr>
+          </table>
+        </form>
+      </p>
+
+      <p>
+        <form method="post">
+          <table class="api">
+            <tr>
+              <td style="width: 20%">Search exhibition by id:</td>
+              <td>
+                <input type="text" name="exhibitionID">
+              </td>
+              <td>
+                <input type="hidden" name="tms" value="{{stub}}">
+                <button type="submit" value="search" name="action">Go</button>
+              </td>
+            </tr>
+          </table>
+        </form>
+      </p>
+
       {{/each}} {{/if}}
     </div>
   </div>
