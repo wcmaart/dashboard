@@ -262,6 +262,26 @@ const processEventsJSON = (req, res, tms, filename) => {
   if (!fs.existsSync(path.join(rootDir, 'events'))) fs.mkdirSync(path.join(rootDir, 'events'))
   if (!fs.existsSync(path.join(rootDir, 'events', tms))) fs.mkdirSync(path.join(rootDir, 'events', tms))
 
+  //  De-normalise them
+  const combinedEvents = {}
+  eventsJSON.forEach((event) => {
+    const id = parseInt(event.eventId, 10)
+    if (!(id in combinedEvents)) {
+      combinedEvents[id] = event
+      combinedEvents[id].objects = []
+    }
+    const objectId = parseInt(event.objectID, 10)
+    if (!isNaN(objectId)) {
+      combinedEvents[id].objects.push(objectId)
+    }
+  })
+
+  eventsJSON = []
+
+  Object.entries(combinedEvents).forEach((event) => {
+    eventsJSON.push(event[1])
+  })
+
   //  In theory we now have a valid(ish) objects file. Let's go through
   //  it now and work out how many objects are new or modified
   eventsJSON.forEach((event) => {

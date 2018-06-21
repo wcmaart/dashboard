@@ -22,7 +22,8 @@
       <h2>Local JSON data</h2>
 
       <h4>To process</h4>
-      {{#if processJSON}} {{else}}
+      {{#if processJSON}}
+      <pre class="query json">{{{jsonCode processJSON}}}</pre>{{else}}
       <p>There is no file to process.</p> {{/if}}
 
       <h4>Processed file</h4>
