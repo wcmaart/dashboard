@@ -107,6 +107,23 @@ exports.index = (req, res) => {
       }
       thisTMS.timeToUpsertEvents = new Date().getTime() + timeToUpsertEvents
 
+      //  Again but processed
+      let eventsProcessed = 0
+      const processedEventsDir = path.join(rootDir, 'events', tms.stub, 'processed')
+      if (fs.existsSync(processedEventsDir)) {
+        const subFolders = fs.readdirSync(processedEventsDir)
+        subFolders.forEach((subFolder) => {
+          const jsonFiles = fs.readdirSync(path.join(processedEventsDir, subFolder)).filter((file) => {
+            const filesSplit = file.split('.')
+            if (filesSplit.length !== 2) return false
+            if (filesSplit[1] !== 'json') return false
+            return true
+          })
+          eventsProcessed += jsonFiles.length
+        })
+      }
+      thisTMS.eventsProcessed = eventsProcessed
+
       //  Now we are doing roughly the same with the exhibitions
       let exhibitionsWaitingToBeProcessed = 0
       const processExhibitionsDir = path.join(rootDir, 'exhibitions', tms.stub, 'process')
@@ -128,6 +145,22 @@ exports.index = (req, res) => {
         timeToUpsertExhibitions = exhibitionsWaitingToBeProcessed * parseInt(timers.elasticsearch, 10)
       }
       thisTMS.timeToUpsertExhibitions = new Date().getTime() + timeToUpsertExhibitions
+
+      let exhibitionsProcessed = 0
+      const processedExhibitionsDir = path.join(rootDir, 'exhibitions', tms.stub, 'processed')
+      if (fs.existsSync(processedExhibitionsDir)) {
+        const subFolders = fs.readdirSync(processedExhibitionsDir)
+        subFolders.forEach((subFolder) => {
+          const jsonFiles = fs.readdirSync(path.join(processedExhibitionsDir, subFolder)).filter((file) => {
+            const filesSplit = file.split('.')
+            if (filesSplit.length !== 2) return false
+            if (filesSplit[1] !== 'json') return false
+            return true
+          })
+          exhibitionsProcessed += jsonFiles.length
+        })
+      }
+      thisTMS.exhibitionsProcessed = exhibitionsProcessed
 
       const endTime = new Date().getTime()
       thisTMS.ms = endTime - startTime
