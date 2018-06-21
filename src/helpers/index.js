@@ -2,7 +2,7 @@ const moment = require('moment')
 const querystring = require('querystring')
 const Prism = require('prismjs')
 var loadLanguages = require('prismjs/components/index.js')
-loadLanguages(['bash', 'graphql'])
+loadLanguages(['bash', 'graphql', 'json'])
 
 exports.ifIndexDivisibleBy = (index, divisor, options) => {
   if ((index + 1) % divisor === 0 && index > 0) {
@@ -233,6 +233,10 @@ const nodeCode = (code) => {
   return Prism.highlight(code, Prism.languages.javascript, 'javascript')
 }
 exports.nodeCode = nodeCode
+
+exports.jsonCode = object => {
+  return Prism.highlight(JSON.stringify(object, null, 4), Prism.languages.json, 'json')
+}
 
 exports.nodeQuery = (query, filter, graphQL, token) => {
   let newQuery = showQuery(query, filter)

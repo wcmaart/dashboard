@@ -150,6 +150,22 @@ class Queries {
     is_3d
     orientation_p_l_s
     copyright_holder
+    color {
+      predominant {
+        color
+        value
+      }
+      search {
+        google {
+          color
+          value
+        }
+        cloudinary {
+          color
+          value
+        }
+      }
+    }
     remote {
       status
       original_image_id
@@ -235,10 +251,104 @@ class Queries {
         height
         format
       }
-     }
+    }
     curNotes
     endISODate
     endDate
+    keyImage {
+      status
+      original_image_id
+      public_id
+      version
+      signature
+      width
+      height
+      format
+    }
+  }
+}`
+
+    this.events = `query {
+  events[[]] {
+    eventId
+    eventName
+    facultyMember
+    subjectAndCourse
+    subject
+    courseNbr
+    institution
+    description
+    startDate
+    startYear
+    startMonth
+    startDay
+    dayOfTheWeek
+    objectID
+    objects {
+      id
+      title
+      maker
+      period
+      object_name
+      medium
+      remote {
+        status
+        original_image_id
+        public_id
+        version
+        signature
+        width
+        height
+        format
+      }
+    }
+    keyImage {
+      status
+      original_image_id
+      public_id
+      version
+      signature
+      width
+      height
+      format
+    }
+  }
+}`
+
+    this.event = `query {
+  event[[]] {
+    eventId
+    eventName
+    facultyMember
+    subjectAndCourse
+    subject
+    courseNbr
+    institution
+    description
+    startDate
+    startYear
+    startMonth
+    startDay
+    dayOfTheWeek
+    objectID
+    object {
+      id
+      title
+      maker
+      period
+      object_name
+      medium
+      remote {
+        status
+        original_image_id
+        public_id
+        version
+        signature
+        width
+        height
+        format
+      }
+    }
     keyImage {
       status
       original_image_id

@@ -8,6 +8,18 @@ exports.index = (req, res) => {
     return res.redirect('/')
   }
 
+  if ('action' in req.body && req.body.action === 'search') {
+    if ('tms' in req.body && 'objectID' in req.body && req.body.objectID !== '') {
+      return res.redirect(`/search/object/${req.body.tms}/${req.body.objectID}`)
+    }
+    if ('tms' in req.body && 'eventID' in req.body && req.body.eventID !== '') {
+      return res.redirect(`/search/event/${req.body.tms}/${req.body.eventID}`)
+    }
+    if ('tms' in req.body && 'exhibitionID' in req.body && req.body.exhibitionID !== '') {
+      return res.redirect(`/search/exhibition/${req.body.tms}/${req.body.exhibitionID}`)
+    }
+  }
+
   //  Just for fun we are going to find out how many perfect records we
   //  have for each TMS system, see how many have images and how many
   //  images have been uploaded
@@ -107,6 +119,23 @@ exports.index = (req, res) => {
       }
       thisTMS.timeToUpsertEvents = new Date().getTime() + timeToUpsertEvents
 
+      //  Again but processed
+      let eventsProcessed = 0
+      const processedEventsDir = path.join(rootDir, 'events', tms.stub, 'processed')
+      if (fs.existsSync(processedEventsDir)) {
+        const subFolders = fs.readdirSync(processedEventsDir)
+        subFolders.forEach((subFolder) => {
+          const jsonFiles = fs.readdirSync(path.join(processedEventsDir, subFolder)).filter((file) => {
+            const filesSplit = file.split('.')
+            if (filesSplit.length !== 2) return false
+            if (filesSplit[1] !== 'json') return false
+            return true
+          })
+          eventsProcessed += jsonFiles.length
+        })
+      }
+      thisTMS.eventsProcessed = eventsProcessed
+
       //  Now we are doing roughly the same with the exhibitions
       let exhibitionsWaitingToBeProcessed = 0
       const processExhibitionsDir = path.join(rootDir, 'exhibitions', tms.stub, 'process')
@@ -128,6 +157,22 @@ exports.index = (req, res) => {
         timeToUpsertExhibitions = exhibitionsWaitingToBeProcessed * parseInt(timers.elasticsearch, 10)
       }
       thisTMS.timeToUpsertExhibitions = new Date().getTime() + timeToUpsertExhibitions
+
+      let exhibitionsProcessed = 0
+      const processedExhibitionsDir = path.join(rootDir, 'exhibitions', tms.stub, 'processed')
+      if (fs.existsSync(processedExhibitionsDir)) {
+        const subFolders = fs.readdirSync(processedExhibitionsDir)
+        subFolders.forEach((subFolder) => {
+          const jsonFiles = fs.readdirSync(path.join(processedExhibitionsDir, subFolder)).filter((file) => {
+            const filesSplit = file.split('.')
+            if (filesSplit.length !== 2) return false
+            if (filesSplit[1] !== 'json') return false
+            return true
+          })
+          exhibitionsProcessed += jsonFiles.length
+        })
+      }
+      thisTMS.exhibitionsProcessed = exhibitionsProcessed
 
       const endTime = new Date().getTime()
       thisTMS.ms = endTime - startTime
