@@ -19,7 +19,7 @@
 
       <h4>To process</h4>
       {{#if processJSON}} {{else}}
-      <p>There is no file to be process.</p> {{/if}}
+      <p>There is no file to process.</p> {{/if}}
 
       <h4>Processed file</h4>
       {{#if processedJSON}}
@@ -54,6 +54,13 @@
         <a href='{{exploreQuery queries.objectLarge searchFilter config.graphql.host}}'>Run in the playground</a>
       </p>
       <pre class="query">{{{graphQLQuery queries.objectLarge searchFilter}}}</pre>
+
+      <hr>
+
+      <p>
+        All queries executed in {{executionTime}}ms
+      </p>
+
     </div>
   </div>
 

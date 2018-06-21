@@ -3,7 +3,7 @@ class Queries {
   /**
    * Create a collection of queries
    */
-  constructor() {
+  constructor () {
     this.schema = `query {
   __schema {
     types {
@@ -251,10 +251,104 @@ class Queries {
         height
         format
       }
-     }
+    }
     curNotes
     endISODate
     endDate
+    keyImage {
+      status
+      original_image_id
+      public_id
+      version
+      signature
+      width
+      height
+      format
+    }
+  }
+}`
+
+    this.events = `query {
+  events[[]] {
+    eventId
+    eventName
+    facultyMember
+    subjectAndCourse
+    subject
+    courseNbr
+    institution
+    description
+    startDate
+    startYear
+    startMonth
+    startDay
+    dayOfTheWeek
+    objectID
+    objects {
+      id
+      title
+      maker
+      period
+      object_name
+      medium
+      remote {
+        status
+        original_image_id
+        public_id
+        version
+        signature
+        width
+        height
+        format
+      }
+    }
+    keyImage {
+      status
+      original_image_id
+      public_id
+      version
+      signature
+      width
+      height
+      format
+    }
+  }
+}`
+
+    this.event = `query {
+  event[[]] {
+    eventId
+    eventName
+    facultyMember
+    subjectAndCourse
+    subject
+    courseNbr
+    institution
+    description
+    startDate
+    startYear
+    startMonth
+    startDay
+    dayOfTheWeek
+    objectID
+    object {
+      id
+      title
+      maker
+      period
+      object_name
+      medium
+      remote {
+        status
+        original_image_id
+        public_id
+        version
+        signature
+        width
+        height
+        format
+      }
+    }
     keyImage {
       status
       original_image_id
@@ -387,7 +481,7 @@ class Queries {
    * @param {string} filter The filter we want to apply to the query i.e. '(limit: 20)'
    * @returns {string|null} A representation of the query ready to be used if found, or null if not.
    */
-  get(query, filter) {
+  get (query, filter) {
     if (!(query in this)) return null
     return this[query].replace('[[]]', filter)
   }
