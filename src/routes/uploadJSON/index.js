@@ -109,6 +109,11 @@ const processObjectJSON = (req, res, tms, filename) => {
 
   ########################################################################## */
 
+  //  Make sure they are correct
+  objectsJSON = objectsJSON.filter((object) => {
+    return ('accession_number' in object)
+  })
+
   //  In theory we now have a valid(ish) objects file. Let's go through
   //  it now and work out how many objects are new or modified
   objectsJSON.forEach((object) => {
@@ -261,6 +266,11 @@ const processEventsJSON = (req, res, tms, filename) => {
   ########################################################################## */
   if (!fs.existsSync(path.join(rootDir, 'events'))) fs.mkdirSync(path.join(rootDir, 'events'))
   if (!fs.existsSync(path.join(rootDir, 'events', tms))) fs.mkdirSync(path.join(rootDir, 'events', tms))
+
+  //  Make sure they are correct
+  eventsJSON = eventsJSON.filter((event) => {
+    return ('eventId' in event)
+  })
 
   //  De-normalise them
   const combinedEvents = {}
@@ -435,6 +445,11 @@ const processExhibitionsJSON = (req, res, tms, filename) => {
   ########################################################################## */
   if (!fs.existsSync(path.join(rootDir, 'exhibitions'))) fs.mkdirSync(path.join(rootDir, 'exhibitions'))
   if (!fs.existsSync(path.join(rootDir, 'exhibitions', tms))) fs.mkdirSync(path.join(rootDir, 'exhibitions', tms))
+
+  //  Make sure they are correct
+  exhibitionsJSON = exhibitionsJSON.filter((exhibition) => {
+    return ('ExhibitionID' in exhibition)
+  })
 
   //  In theory we now have a valid(ish) objects file. Let's go through
   //  it now and work out how many objects are new or modified
