@@ -33,7 +33,11 @@
 
       <h4>TMS &amp; extra information</h4>
       {{#if perfectJSON}}
-      <pre class="query json">{{{jsonCode perfectJSON}}}</pre>{{else}}
+      <pre class="query json">{{{jsonCode perfectJSON}}}</pre> {{#if config.cloudinary}} {{#if perfectJSON.remote}}
+      <p style="text-align: center">
+        <img src="http://res.cloudinary.com/{{config.cloudinary.cloud_name}}/image/upload/w_500,h_500,c_fill_pad,g_auto/v{{perfectJSON.remote.version}}/{{perfectJSON.remote.public_id}}.{{perfectJSON.remote.format}}">
+      </p>
+      {{/if}} {{/if}} {{else}}
       <p>There is no TMS or extra information.</p> {{/if}}
 
       <hr>
