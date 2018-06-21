@@ -141,6 +141,39 @@
       </p>
 
       <hr />
+      <h2>
+        <a name="spelunker">Spelunker</a>
+      </h2>
+      {{#if config.spelunker}}
+      <p>
+        Congratulations the Spelunker has been set up
+      </p>
+      <p>
+        You can reconfigure it below if needed.
+      </p>
+      {{/if}}
+      <p>
+        <form method="post">
+          <table>
+            <tr>
+              <td>Spelunker</td>
+              <td>
+                <input type="text" name="spelunker" placeholder="{{#ifEqual NODE_ENV 'development'}}http://localhost:4001{{else}}https://spelunker.com{{/ifEqual}}"
+                  {{#if config.spelunker.host}}value="{{config.spelunker.host}}" {{/if}}>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <button type="submit" value="updatespelunker" name="action">Update</button>
+              </td>
+            </tr>
+          </table>
+
+        </form>
+      </p>
+
+      <hr />
+
 
       <h2>
         <a name="tms"></a>TMS</h2>
