@@ -14,7 +14,11 @@
     <div class="container admin-layout documentation">
 
       <h1>Search - Object - {{id}}</h1>
-
+      {{#if config.spelunker}}
+      <p>
+        <a href="{{config.spelunker.host}}/objects/{{id}}">View Object {{id}} on the spelunker</a>
+      </p>
+      {{/if}}
       <h2>Local JSON data</h2>
 
       <h4>To process</h4>
