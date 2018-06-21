@@ -187,21 +187,23 @@ const getImageForExhibition = (tms, ids) => {
   return remote
 }
 
-const getImageForEvent = (tms, id) => {
+const getImageForEvent = (tms, ids) => {
   let remote = null
   const tmsDir = path.join(rootDir, 'tms')
   const perfectDir = path.join(tmsDir, tms, 'perfect')
-  if (!isNaN(id)) {
-    const subFolder = String(Math.floor(id / 1000) * 1000)
-    const perfectFilename = path.join(perfectDir, subFolder, `${id}.json`)
-    if (fs.existsSync(perfectFilename)) {
-      const perfectObjectRaw = fs.readFileSync(perfectFilename, 'utf-8')
-      const perfectObject = JSON.parse(perfectObjectRaw)
-      if ('remote' in perfectObject && perfectObject.remote !== null && 'status' in perfectObject.remote && perfectObject.remote.status === 'ok') {
-        remote = perfectObject.remote
+  ids.forEach((id) => {
+    if (remote === null) {
+      const subFolder = String(Math.floor(id / 1000) * 1000)
+      const perfectFilename = path.join(perfectDir, subFolder, `${id}.json`)
+      if (fs.existsSync(perfectFilename)) {
+        const perfectObjectRaw = fs.readFileSync(perfectFilename, 'utf-8')
+        const perfectObject = JSON.parse(perfectObjectRaw)
+        if ('remote' in perfectObject && perfectObject.remote !== null && 'status' in perfectObject.remote && perfectObject.remote.status === 'ok') {
+          remote = perfectObject.remote
+        }
       }
     }
-  }
+  })
 
   return remote
 }
@@ -420,7 +422,7 @@ const upsertEvent = async (stub, id) => {
   upsertEvent.subject = upsertEvent.subject.trim()
 
   //  Go and get a key image for the event
-  const keyImage = getImageForEvent(stub, parseInt(upsertEvent.objectID, 10))
+  const keyImage = getImageForEvent(stub, upsertEvent.objects)
   if (keyImage !== null) {
     upsertEvent.keyImage = keyImage
   }

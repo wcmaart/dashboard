@@ -24,7 +24,6 @@ exports.index = async (req, res) => {
   const subFolder = String(Math.floor(id / 1000) * 1000)
   const processFilename = path.join(rootDir, 'events', tms, 'process', subFolder, `${id}.json`)
   const processedFilename = path.join(rootDir, 'events', tms, 'processed', subFolder, `${id}.json`)
-
   if (fs.existsSync(processFilename)) {
     const processFileRaw = fs.readFileSync(processFilename, 'utf-8')
     processJSON = JSON.parse(processFileRaw)

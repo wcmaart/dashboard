@@ -198,6 +198,32 @@ class Queries {
         format
       }
     }
+    events {
+      eventId
+      eventName
+      facultyMember
+      subjectAndCourse
+      subject
+      courseNbr
+      institution
+      description
+      startDate
+      startYear
+      startMonth
+      startDay
+      dayOfTheWeek
+      objects
+      keyImage {
+        status
+        original_image_id
+        public_id
+        version
+        signature
+        width
+        height
+        format
+      }  
+    }
   }
 }`
 
@@ -283,25 +309,7 @@ class Queries {
     startMonth
     startDay
     dayOfTheWeek
-    objectID
-    objects {
-      id
-      title
-      maker
-      period
-      object_name
-      medium
-      remote {
-        status
-        original_image_id
-        public_id
-        version
-        signature
-        width
-        height
-        format
-      }
-    }
+    objects
     keyImage {
       status
       original_image_id
@@ -330,8 +338,7 @@ class Queries {
     startMonth
     startDay
     dayOfTheWeek
-    objectID
-    object {
+    objects {
       id
       title
       maker
