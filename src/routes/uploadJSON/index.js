@@ -284,6 +284,10 @@ const processEventsJSON = (req, res, tms, filename) => {
     if (!isNaN(objectId)) {
       combinedEvents[id].objects.push(objectId)
     }
+    const relatedObjectID = parseInt(event.relatedObjectID, 10)
+    if (!isNaN(relatedObjectID)) {
+      combinedEvents[id].objects.push(relatedObjectID)
+    }
   })
 
   eventsJSON = []

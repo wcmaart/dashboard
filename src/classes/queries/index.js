@@ -212,6 +212,7 @@ class Queries {
       startMonth
       startDay
       dayOfTheWeek
+      eventType
       objects
       keyImage {
         status
@@ -309,6 +310,7 @@ class Queries {
     startMonth
     startDay
     dayOfTheWeek
+    eventType
     objects
     keyImage {
       status
@@ -338,6 +340,7 @@ class Queries {
     startMonth
     startDay
     dayOfTheWeek
+    eventType
     objects {
       id
       title
