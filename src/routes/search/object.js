@@ -46,6 +46,55 @@ exports.index = async (req, res) => {
   req.templateValues.processedJSON = processedJSON
   req.templateValues.perfectJSON = perfectJSON
 
+  //  Do colour stuff here
+  const predominant = []
+  let backgroundColor = null
+
+  if (perfectJSON !== null && 'color' in perfectJSON && 'predominant' in perfectJSON.color) {
+    let total = 0.0
+    const predoms = JSON.parse(perfectJSON.color.predominant)
+    Object.entries(predoms).forEach((entry) => {
+      if (backgroundColor === null) {
+        backgroundColor = entry[0].replace('#', '')
+      }
+      const percent = parseFloat(entry[1])
+      total += percent
+    })
+    Object.entries(predoms).forEach((entry) => {
+      const color = entry[0]
+      const percent = parseFloat(entry[1]) / total * 100
+      predominant.push({
+        color,
+        percent,
+        nicePercent: parseFloat(entry[1])
+      })
+    })
+    if (backgroundColor === null) {
+      backgroundColor = 'CCC'
+    }
+    req.templateValues.backgroundColor = backgroundColor
+    req.templateValues.predominant = predominant
+  }
+
+  const cloudinary = []
+  if (perfectJSON !== null && 'color' in perfectJSON && 'search' in perfectJSON.color && 'cloudinary' in perfectJSON.color.search) {
+    let total = 0.0
+    const clouds = perfectJSON.color.search.cloudinary
+    Object.entries(clouds).forEach((entry) => {
+      const percent = parseFloat(entry[1])
+      total += percent
+    })
+    Object.entries(clouds).forEach((entry) => {
+      const color = entry[0]
+      const percent = parseFloat(entry[1]) / total * 100
+      cloudinary.push({
+        color,
+        percent,
+        nicePercent: parseFloat(entry[1])
+      })
+    })
+    req.templateValues.cloudinary = cloudinary
+  }
   //  Now get the results from elastic search
   let elasticSearchJSON = null
   const config = new Config()
