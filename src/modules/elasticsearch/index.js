@@ -411,7 +411,7 @@ const upsertEvent = async (stub, id) => {
     delete upsertEvent.startDateDate
   }
 
-  const sd = upsertEvent.startDate
+  const sd = new Date(upsertEvent.startDate)
   if ((sd instanceof Date && !isNaN(sd)) === false) {
     delete upsertEvent.startDate
   }
