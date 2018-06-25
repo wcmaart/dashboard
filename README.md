@@ -56,7 +56,7 @@ Before anything else you will need to make sure you have installed the following
 + [Yarn](https://yarnpkg.com/en/docs/install)
 + Some flavour of git (obviously)
 
-The clone the repository and read the next section before doing anything else.
+Then clone the repository and read the next section before doing anything else.
 
 You will probably also need to...
 
@@ -64,7 +64,7 @@ You will probably also need to...
 + Sign up to [Auth0](https://auth0.com)
 + Create an account on [Cloudinary](https://cloudinary.com/console)
 
-...I advice setting up a "developer" and "production" version of each of the above, unless you intend on running _just_ a developer version or _just_ a production version. And hey, staging too if you wish.
+...I advise setting up a "developer" and "production" version of each of the above, unless you intend on running _just_ a developer version or _just_ a production version. And hey, staging too if you wish.
 
 ### Starting in development
 
