@@ -79,7 +79,7 @@ exports.index = (req, res) => {
       let waitingToBeProcessed = 0
       const processDir = path.join(rootDir, 'tms', tms.stub, 'process')
       if (fs.existsSync(processDir)) {
-        const subFolders = fs.readdirSync(perfectDir)
+        const subFolders = fs.readdirSync(processDir)
         subFolders.forEach((subFolder) => {
           const jsonFiles = fs.readdirSync(path.join(processDir, subFolder)).filter((file) => {
             const filesSplit = file.split('.')
