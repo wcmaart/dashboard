@@ -17,6 +17,32 @@ const stats = require('./stats')
 const uploadJSON = require('./uploadJSON')
 const user = require('./user')
 
+//  Redirect to https, make sure...
+//  app.enable('trust proxy')
+//  is set in server.js
+router.use(function (req, res, next) {
+  let remoteAccess = true
+
+  //  Because of the way we are hosting we need to do an extra weird check
+  //  about coming in from outside or via a ip:port before we tie up the whole
+  //  lot in a knot.
+  const hostSplit = req.headers['host'].split(':')
+  if (hostSplit.length > 1) {
+    if (hostSplit[1] === process.env.PORT) {
+      remoteAccess = false
+    }
+  }
+  if (!(req.secure) && process.env.REDIRECT_HTTPS === 'true' && remoteAccess === true) {
+    var secureUrl = 'https://' + req.headers['host'] + req.url
+    res.writeHead(301, {
+      Location: secureUrl
+    })
+    res.end()
+  } else {
+    next()
+  }
+})
+
 // ############################################################################
 //
 /*

@@ -355,6 +355,7 @@ if (auth0 !== null) {
   app.use(passport.session())
 }
 
+app.enable('trust proxy')
 app.use('/', routes)
 
 app.use((request, response) => {
