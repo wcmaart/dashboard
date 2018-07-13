@@ -1,7 +1,9 @@
-const request = require('request-promise')
-const auth0 = require('../../modules/auth0')
+const fs = require('fs')
+const path = require('path')
 const Config = require('../../classes/config')
 const elasticsearch = require('elasticsearch')
+
+const rootDir = path.join(__dirname, '../../..')
 
 exports.index = (req, res) => {
   if (req.user.roles.isAdmin !== true && req.user.roles.isStaff !== true) {
@@ -108,9 +110,7 @@ const validate = async (req, res) => {
 
 exports.checkToken = async (req, res) => {
   //  Check to see if we have a valid call
-  console.log('Checking if valid')
   const isValid = await validate(req, res)
-  console.log('isValid: ', isValid)
   if (isValid === false) {
     return
   }
@@ -142,32 +142,20 @@ exports.checkToken = async (req, res) => {
   }
 
   //  Now we know everything is valid, we can test to see if the token exists
-  const auth0Token = await auth0.getAuth0Token()
-  const qs = {
-    fields: 'user_metadata',
-    per_page: 100,
-    search_engine: 'v2'
+  let foundToken = false
+  const filename = path.join(rootDir, 'data', 'tokens.json')
+  if (fs.existsSync(filename)) {
+    const tokensRaw = fs.readFileSync(filename, 'utf-8')
+    const tokensJSON = JSON.parse(tokensRaw)
+    //  If we have a record of the token, then it's valid
+    if (req.body.token in tokensJSON.valid) {
+      foundToken = true
+    }
+    //  Unless of course it's not
+    if (req.body.token in tokensJSON.rejected) {
+      foundToken = false
+    }
   }
-  const foundToken = await request({
-    url: `https://${auth0info.AUTH0_DOMAIN}/api/v2/users`,
-    method: 'GET',
-    headers: {
-      'content-type': 'application/json',
-      Authorization: `bearer ${auth0Token}`
-    },
-    qs: qs
-  })
-    .then(response => {
-      const token = JSON.parse(response).map((user) => {
-        return user.user_metadata.apitoken
-      }).filter((token) => {
-        return token === req.body.token
-      })
-      return token.length === 1
-    })
-    .catch(error => {
-      return [error]
-    })
 
   if (foundToken !== true) {
     const error = {

@@ -2,15 +2,19 @@
  * This module allows us to grab an API token from auth0
  * @module modules/auth0
  */
+const fs = require('fs')
+const path = require('path')
 const request = require('request-promise')
 const Config = require('../../classes/config')
+
+const rootDir = path.join(__dirname, '../../..')
 
 /**
  * Gets us the token we need to call further API methods on the Auth0 endpoint
  * @returns {string|Array} The bearer token used in future API calls, or an Array
  * an error was generated.
  */
-exports.getAuth0Token = async () => {
+const getAuth0Token = async () => {
   //  First we check to see if we already have a token and if
   //  it's still valid. The expires was a time set into the
   //  future based on what Auth0 API gave us back. As long as
@@ -63,4 +67,82 @@ exports.getAuth0Token = async () => {
     expires: expires
   }
   return global.auth0.token
+}
+exports.getAuth0Token = getAuth0Token
+
+const getAllUserTokens = async (page) => {
+  const config = new Config()
+  const auth0info = config.get('auth0')
+  if (auth0info === null) {
+    console.log('auth0 is not set up')
+    return
+  }
+
+  const auth0Token = await getAuth0Token()
+  const qs = {
+    fields: 'user_id,user_metadata',
+    per_page: 100,
+    page: page,
+    search_engine: 'v2'
+  }
+  const users = await request({
+    url: `https://${auth0info.AUTH0_DOMAIN}/api/v2/users`,
+    method: 'GET',
+    headers: {
+      'content-type': 'application/json',
+      Authorization: `bearer ${auth0Token}`
+    },
+    qs: qs
+  })
+    .then(response => {
+      const users = JSON.parse(response)
+      return users.map((user) => {
+        return {
+          id: user.user_id,
+          token: user.user_metadata.apitoken
+        }
+      })
+        .filter((user) => {
+          return (user.token !== '' && user.token !== null && user.token !== undefined)
+        })
+    })
+
+  //  Read in the tokens file, or create a new object if we don't have one
+  const filename = path.join(rootDir, 'data', 'tokens.json')
+  let tokensJSON = {
+    valid: {},
+    rejected: {}
+  }
+  if (fs.existsSync(filename)) {
+    const tokensRaw = fs.readFileSync(filename, 'utf-8')
+    tokensJSON = JSON.parse(tokensRaw)
+  }
+
+  //  Go through the tokensJSON adding or updating the tokens
+  users.forEach((user) => {
+    if (!(user.token in tokensJSON.valid)) {
+      tokensJSON.valid[user.token] = {
+        id: user.id,
+        created: new Date().getTime()
+      }
+    }
+    tokensJSON.valid[user.token].updated = new Date().getTime()
+  })
+
+  const tokensJSONPretty = JSON.stringify(tokensJSON, null, 4)
+  fs.writeFileSync(filename, tokensJSONPretty, 'utf-8')
+
+  if (users.length > 0) {
+    getAllUserTokens(page + 1)
+  }
+}
+
+//  This kicks off fetching the tokens from auth0
+exports.startGettingAllUserTokens = () => {
+  //  Remove the old interval timer
+  clearInterval(global.getUserTokensTmr)
+  global.getUserTokensTmr = setInterval(() => {
+    getAllUserTokens(0)
+  }, 1000 * 60 * 5)
+  getAllUserTokens(0)
 }
