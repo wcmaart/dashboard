@@ -452,3 +452,7 @@ const elasticsearch = require('./app/modules/elasticsearch')
 elasticsearch.startUpserting()
 elasticsearch.startUpsertingEvents()
 elasticsearch.startUpsertingExhibitions()
+
+//  This starts off checking for images to upload to elastic search
+const auth0Users = require('./app/modules/auth0')
+auth0Users.startGettingAllUserTokens()
