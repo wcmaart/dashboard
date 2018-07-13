@@ -81,7 +81,7 @@ const getAllUserTokens = async (page) => {
   const auth0Token = await getAuth0Token()
   const qs = {
     fields: 'user_id,user_metadata',
-    per_page: 2,
+    per_page: 100,
     page: page,
     search_engine: 'v2'
   }
