@@ -395,7 +395,9 @@ const upsertEvent = async (stub, id) => {
   upsertEvent.startYear = parseInt(upsertEvent.startYear, 10)
   upsertEvent.startMonth = parseInt(upsertEvent.startMonth, 10)
   upsertEvent.startDay = parseInt(upsertEvent.startDay, 10)
-  upsertEvent.objectID = parseInt(upsertEvent.objectID, 10)
+
+  delete upsertEvent.objectID
+  delete upsertEvent.relatedObjectID
 
   if (isNaN(upsertEvent.courseNbr)) upsertEvent.courseNbr = null
   if (isNaN(upsertEvent.startYear)) upsertEvent.startYear = null
@@ -418,6 +420,7 @@ const upsertEvent = async (stub, id) => {
 
   upsertEvent.description = upsertEvent.Description
   delete upsertEvent.Description
+
   upsertEvent.subjectAndCourse = upsertEvent.subjectAndCourse.trim()
   upsertEvent.subject = upsertEvent.subject.trim()
 
