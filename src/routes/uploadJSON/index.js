@@ -82,7 +82,14 @@ const processObjectJSON = (req, res, tms, filename) => {
   const startTime = new Date().getTime()
   const tmsLogger = logging.getTMSLogger()
 
-  const objectsRAW = fs.readFileSync(filename, 'utf-8')
+  let objectsRAW = fs.readFileSync(filename, 'utf-8')
+  //  We are being given some "JSON" like JSON which isn't actually JSON
+  //  until we remove a whole bunch of special characters, like so...
+  //  Get rid of curly apostrophes (we may need to do this for curly quotes too)
+  objectsRAW = objectsRAW.replace(/’/g, '\'')
+  //  Now the rest of the special characters
+  objectsRAW = objectsRAW.replace(/[^\x20-\x7E]/g, '')
+
   //  Add try catch here
   let objectsJSON = null
   try {
@@ -238,11 +245,27 @@ const processEventsJSON = (req, res, tms, filename) => {
   const startTime = new Date().getTime()
   const tmsLogger = logging.getTMSLogger()
 
-  const objectsRAW = fs.readFileSync(filename, 'utf-8')
-  //  Add try catch here
+  let eventsRAW = fs.readFileSync(filename, 'utf-8')
+  //  We are being given some "JSON" like JSON which isn't actually JSON
+  //  until we remove the starting '{"Events":' and final '}' and whooo
+  //  a whole bunch of special characters, like so...
+  //  Get rid of curly apostrophes (we may need to do this for curly quotes too)
+  eventsRAW = eventsRAW.replace(/’/g, '\'')
+  //  Now the rest of the special characters
+  eventsRAW = eventsRAW.replace(/[^\x20-\x7E]/g, '')
+  //  Get rid of the starting {"Events":
+  eventsRAW = eventsRAW.split(':')
+  eventsRAW.shift()
+  eventsRAW = eventsRAW.join(':')
+  //  Get rid of the tail ']' and the trailing special characters that
+  //  go along with it
+  eventsRAW = eventsRAW.split(']')
+  eventsRAW.pop()
+  eventsRAW = eventsRAW.join(']') + ']'
+
   let eventsJSON = null
   try {
-    eventsJSON = JSON.parse(objectsRAW)
+    eventsJSON = JSON.parse(eventsRAW)
   } catch (er) {
     req.templateValues.error = {
       msg: 'Sorry, we failed to parse that JSON file, please try again.'
@@ -421,11 +444,28 @@ const processExhibitionsJSON = (req, res, tms, filename) => {
   const startTime = new Date().getTime()
   const tmsLogger = logging.getTMSLogger()
 
-  const objectsRAW = fs.readFileSync(filename, 'utf-8')
+  let exhibitionsRAW = fs.readFileSync(filename, 'utf-8')
+  //  We are being given some "JSON" like JSON which isn't actually JSON
+  //  until we remove the starting '{"Exhibitions":' and final '}' and whooo
+  //  a whole bunch of special characters, like so...
+  //  Get rid of curly apostrophes (we may need to do this for curly quotes too)
+  exhibitionsRAW = exhibitionsRAW.replace(/’/g, '\'')
+  //  Now the rest of the special characters
+  exhibitionsRAW = exhibitionsRAW.replace(/[^\x20-\x7E]/g, '')
+  //  Get rid of the starting {"Exhibitions":
+  exhibitionsRAW = exhibitionsRAW.split(':')
+  exhibitionsRAW.shift()
+  exhibitionsRAW = exhibitionsRAW.join(':')
+  //  Get rid of the tail ']' and the trailing special characters that
+  //  go along with it
+  exhibitionsRAW = exhibitionsRAW.split(']')
+  exhibitionsRAW.pop()
+  exhibitionsRAW = exhibitionsRAW.join(']') + ']'
+
   //  Add try catch here
   let exhibitionsJSON = null
   try {
-    exhibitionsJSON = JSON.parse(objectsRAW)
+    exhibitionsJSON = JSON.parse(exhibitionsRAW)
   } catch (er) {
     req.templateValues.error = {
       msg: 'Sorry, we failed to parse that JSON file, please try again.'
@@ -455,6 +495,30 @@ const processExhibitionsJSON = (req, res, tms, filename) => {
     return ('ExhibitionID' in exhibition)
   })
 
+  //  De-normalise them
+  const combinedExhibitions = {}
+  exhibitionsJSON.forEach((exhibition) => {
+    const id = parseInt(exhibition.ExhibitionID, 10)
+    if (!(id in combinedExhibitions)) {
+      combinedExhibitions[id] = exhibition
+      combinedExhibitions[id].ExhObjXrefs = []
+    }
+    const objectId = parseInt(exhibition.ObjectID, 10)
+    if (!isNaN(objectId)) {
+      combinedExhibitions[id].ExhObjXrefs.push(objectId)
+    }
+    const relatedObjectID = parseInt(exhibition.relatedObjectID, 10)
+    if (!isNaN(relatedObjectID)) {
+      combinedExhibitions[id].ExhObjXrefs.push(relatedObjectID)
+    }
+  })
+
+  exhibitionsJSON = []
+
+  Object.entries(combinedExhibitions).forEach((exhibition) => {
+    exhibitionsJSON.push(exhibition[1])
+  })
+
   //  In theory we now have a valid(ish) objects file. Let's go through
   //  it now and work out how many objects are new or modified
   exhibitionsJSON.forEach((exhibition) => {
@@ -463,13 +527,10 @@ const processExhibitionsJSON = (req, res, tms, filename) => {
     const subFolder = String(Math.floor(id / 1000) * 1000)
     const filename = path.join(rootDir, 'exhibitions', tms, 'processed', subFolder, `${id}.json`)
 
-    //  Turn the ExhObjXrefs field into an array
-    exhibition.ExhObjXrefs = exhibition.ExhObjXrefs.map((object) => {
-      return parseInt(object.ObjectID, 10)
-    })
-    exhibition.ExhObjXrefs = exhibition.ExhObjXrefs.filter((object) => {
-      return !isNaN(object)
-    })
+    delete exhibition.ObjectID
+    delete exhibition.relatedObjectID
+    exhibition.description = exhibition.Description
+    delete exhibition.Description
 
     //  See if the files exists in processed, if it doesn't then it's a new file
     let needToUpload = false
