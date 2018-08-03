@@ -22,7 +22,6 @@ const yarn = spawnSync('yarn', ['install'])
 console.log(yarn.stdout.toString())
 
 const colours = require('colors')
-const prompt = require('prompt-sync')()
 
 colours.setTheme({
   info: 'green',
@@ -42,6 +41,7 @@ console.log(`server.js exists in this directory: ${rootDir}`.help)
  * Check to see if we have been passed in command line parameters to define
  * the port, host, environment and if we want to skip any build steps
  */
+const prompt = require('prompt-sync')()
 const argOptionDefinitions = [{
   name: 'port',
   alias: 'p',
@@ -326,6 +326,7 @@ app.use(
     })
   })
 )
+
 const auth0 = config.get('auth0')
 if (auth0 !== null) {
   // Configure Passport to use Auth0
@@ -362,7 +363,7 @@ app.use((request, response) => {
   response.status(404).render('static/404')
 })
 
-if (process.env.NODE_ENV !== 'DEV') {
+if (process.env.NODE_ENV !== 'development') {
   app.use((err, req, res) => {
     console.error(err.stack)
     res.status(500).send('Something broke!')
