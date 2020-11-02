@@ -168,7 +168,7 @@ const checkImages = () => {
               uploadImage(tms, file.split('.')[0])
             }
           } catch (er) {
-            console.error('Failed to parse: ', perfectFileRaw)
+            console.error('Failed to parse: ', path.join(tmsDir, subFolder, file))
           }
         })
       })
@@ -387,7 +387,7 @@ const checkImagesColor = () => {
               colorImage(tms, file.split('.')[0])
             }
           } catch (er) {
-            console.error('Failed to parse: ', perfectFileRaw)
+            console.error('Failed to parse: ', path.join(tmsDir, subFolder, file))
           }
         })
       })
