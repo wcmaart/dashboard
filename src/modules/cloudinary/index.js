@@ -161,10 +161,14 @@ const checkImages = () => {
         files.forEach((file) => {
           if (foundImageToUpload === true) return
           const perfectFileRaw = fs.readFileSync(path.join(tmsDir, subFolder, file), 'utf-8')
-          const perfectFile = JSON.parse(perfectFileRaw)
-          if (perfectFile.tmsSource !== null && perfectFile.remote === null) {
-            foundImageToUpload = true
-            uploadImage(tms, file.split('.')[0])
+          try {
+            const perfectFile = JSON.parse(perfectFileRaw)
+            if (perfectFile.tmsSource !== null && perfectFile.remote === null) {
+              foundImageToUpload = true
+              uploadImage(tms, file.split('.')[0])
+            }
+          } catch (er) {
+            console.error('Failed to parse: ', perfectFileRaw)
           }
         })
       })
