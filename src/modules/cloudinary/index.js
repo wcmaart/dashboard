@@ -374,16 +374,20 @@ const checkImagesColor = () => {
         files.forEach((file) => {
           if (foundImageToColor === true) return
           const perfectFileRaw = fs.readFileSync(path.join(tmsDir, subFolder, file), 'utf-8')
-          const perfectFile = JSON.parse(perfectFileRaw)
-          if (
-            perfectFile.tmsSource !== null &&
-            perfectFile.remote !== null &&
-            'status' in perfectFile.remote &&
-            perfectFile.remote.status !== 'error' &&
-            (!('color' in perfectFile) || perfectFile.color.predominant === '{}')
-          ) {
-            foundImageToColor = true
-            colorImage(tms, file.split('.')[0])
+          try {
+            const perfectFile = JSON.parse(perfectFileRaw)
+            if (
+              perfectFile.tmsSource !== null &&
+              perfectFile.remote !== null &&
+              'status' in perfectFile.remote &&
+              perfectFile.remote.status !== 'error' &&
+              (!('color' in perfectFile) || perfectFile.color.predominant === '{}')
+            ) {
+              foundImageToColor = true
+              colorImage(tms, file.split('.')[0])
+            }
+          } catch (er) {
+            console.error('Failed to parse: ', perfectFileRaw)
           }
         })
       })
